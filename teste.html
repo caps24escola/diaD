@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Museu Virtual — Mulheres na Ciência (VR Nativo)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #050810;
+      --navy: #0a0f1e;
+      --gold: #c9a86a;
+      --cream: #f2ecdd;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: var(--ink);
+      color: var(--cream);
+      font-family: 'Space Mono', monospace;
+    }
+    #ui-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      background: radial-gradient(circle at center, transparent 0%, rgba(5,8,16,0.8) 100%);
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      color: var(--gold);
+      margin-bottom: 10px;
+      text-align: center;
+      text-shadow: 0 4px 15px rgba(201,168,106,0.3);
+    }
+    p.subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      text-align: center;
+      max-width: 600px;
+    }
+    /* O botão VR será injetado pelo Three.js, mas estilizamos a dica */
+    .vr-hint {
+      background: rgba(10, 15, 30, 0.8);
+      padding: 15px 25px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      pointer-events: auto;
+    }
+    #loading {
+      position: absolute;
+      background: var(--ink);
+      inset: 0;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--gold);
+      transition: opacity 1s ease;
+    }
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+
+  <!-- Import maps do Three.js -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <div id="loading">Carregando Acervo...</div>
+
+  <div id="ui-container">
+    <h1>Mulheres na Ciência</h1>
+    <p class="subtitle">Um museu imersivo. Acesse no Meta Quest 3 e clique no botão abaixo para entrar em Realidade Virtual.</p>
+    <div class="vr-hint">Use o Analógico (Thumbstick) para andar.</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { VRButton } from 'three/addons/webxr/VRButton.js';
+    import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+
+    let camera, scene, renderer;
+    let playerRig; // "Carrinho" que guarda a câmera e controles para podermos andar
+    let controller1, controller2;
+    let controllerGrip1, controllerGrip2;
+
+    const clock = new THREE.Clock();
+
+    init();
+
+    function init() {
+      // 1. Configuração Básica de Cena
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0f1e); // Azul escuro / Navy
+      scene.fog = new THREE.Fog(0x0a0f1e, 5, 30);
+
+      // 2. Câmera e Carrinho (Player Rig)
+      // No WebXR, para mover o jogador sem quebrar o rastreamento da cabeça,
+      // movemos um grupo que contém a câmera e os controles.
+      playerRig = new THREE.Group();
+      playerRig.position.set(0, 0, 5); // Posição inicial no museu
+      scene.add(playerRig);
+
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      // A câmera é controlada pelo Quest 3, então ela fica em (0,0,0) dentro do playerRig
+      playerRig.add(camera);
+
+      // 3. Iluminação
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xc9a86a, 2);
+      dirLight.position.set(5, 10, 5);
+      scene.add(dirLight);
+
+      // 4. Construção do Museu
+      buildMuseum();
+
+      // 5. Renderizador e ATIVAÇÃO DO WEBXR (Crucial para o Quest 3)
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true; // ISSO HABILITA O MODO VR NATIVO!
+      document.body.appendChild(renderer.domElement);
+
+      // 6. Botão de VR do Three.js (Comunica com a API WebXR do Navegador)
+      const vrButton = VRButton.createButton(renderer);
+      // Estilizando o botão padrão para combinar com seu tema
+      vrButton.style.backgroundColor = '#c9a86a';
+      vrButton.style.color = '#050810';
+      vrButton.style.fontFamily = "'Space Mono', monospace";
+      vrButton.style.fontWeight = "bold";
+      vrButton.style.bottom = "15%";
+      vrButton.style.border = "none";
+      document.body.appendChild(vrButton);
+
+      // Quando entra em VR, esconde a UI de texto da tela plana
+      renderer.xr.addEventListener('sessionstart', () => {
+        document.getElementById('ui-container').style.display = 'none';
+      });
+      renderer.xr.addEventListener('sessionend', () => {
+        document.getElementById('ui-container').style.display = 'flex';
+      });
+
+      // 7. Controles do Quest 3
+      setupControllers();
+
+      // 8. Eventos de Janela
+      window.addEventListener('resize', onWindowResize);
+
+      // Esconde a tela de carregamento
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+      }, 1000);
+
+      // 9. Loop de Animação (No WebXR TEM que ser setAnimationLoop, não requestAnimationFrame)
+      renderer.setAnimationLoop(animate);
+    }
+
+    function buildMuseum() {
+      // Chão
+      const floorGeo = new THREE.PlaneGeometry(30, 30);
+      const floorMat = new THREE.MeshStandardMaterial({ 
+        color: 0x111a30, 
+        roughness: 0.8,
+        metalness: 0.2
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      scene.add(floor);
+
+      // Teto
+      const ceil = new THREE.Mesh(floorGeo, new THREE.MeshBasicMaterial({ color: 0x050810 }));
+      ceil.rotation.x = Math.PI / 2;
+      ceil.position.y = 6;
+      scene.add(ceil);
+
+      // Adicionando algumas quadros/pinturas simuladas
+      createArtwork("Marie Curie", "Pioneira na radioatividade.\nPrimeira pessoa a ganhar\ndois Prêmios Nobel.", -5, 2, -5, 0x7d5ba6);
+      createArtwork("Ada Lovelace", "Matemática e escritora.\nEscreveu o primeiro\nalgoritmo de computador.", 0, 2, -8, 0xc9a86a);
+      createArtwork("Rosalind Franklin", "Química cujos dados de\nraios-X revelaram a dupla\nhélice do DNA.", 5, 2, -5, 0x5b7da6);
+
+      // Pedestais
+      createPedestal(-5, 0, -4.5);
+      createPedestal(0, 0, -7.5);
+      createPedestal(5, 0, -4.5);
+    }
+
+    function createArtwork(title, desc, x, y, z, colorHex) {
+      // Criação de Textura com Canvas para exibir os textos no VR
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      
+      // Fundo
+      ctx.fillStyle = '#' + new THREE.Color(colorHex).getHexString();
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Borda
+      ctx.strokeStyle = '#f2ecdd';
+      ctx.lineWidth = 15;
+      ctx.strokeRect(15, 15, 482, 482);
+
+      // Texto (Título)
+      ctx.fillStyle = '#f2ecdd';
+      ctx.font = 'bold 40px "Playfair Display", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, 256, 120);
+
+      // Texto (Descrição)
+      ctx.font = '28px "Space Mono", monospace';
+      const lines = desc.split('\n');
+      for(let i=0; i<lines.length; i++) {
+        ctx.fillText(lines[i], 256, 220 + (i * 40));
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.MeshBasicMaterial({ map: texture });
+      const geometry = new THREE.PlaneGeometry(3, 3);
+      const mesh = new THREE.Mesh(geometry, material);
+      
+      mesh.position.set(x, y, z);
+      // Fazer o quadro olhar para o centro
+      mesh.lookAt(0, y, 0); 
+      scene.add(mesh);
+    }
+
+    function createPedestal(x, y, z) {
+      const geo = new THREE.CylinderGeometry(0.5, 0.6, 1, 16);
+      const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y + 0.5, z);
+      scene.add(mesh);
+    }
+
+    function setupControllers() {
+      // Raios laser saindo dos controles
+      const geometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, -1)
+      ]);
+      const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0xc9a86a }));
+      line.name = 'line';
+      line.scale.z = 5;
+
+      controller1 = renderer.xr.getController(0);
+      controller1.add(line.clone());
+      playerRig.add(controller1);
+
+      controller2 = renderer.xr.getController(1);
+      controller2.add(line.clone());
+      playerRig.add(controller2);
+
+      // Modelos 3D das mãos/controles
+      const controllerModelFactory = new XRControllerModelFactory();
+      
+      controllerGrip1 = renderer.xr.getControllerGrip(0);
+      controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
+      playerRig.add(controllerGrip1);
+
+      controllerGrip2 = renderer.xr.getControllerGrip(1);
+      controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
+      playerRig.add(controllerGrip2);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // --- SISTEMA DE LOCOMOÇÃO (THUMBSTICK) ---
+    function handleLocomotion(dt) {
+      const session = renderer.xr.getSession();
+      if (!session) return;
+
+      // Percorre os controles conectados
+      for (const source of session.inputSources) {
+        if (!source.gamepad) continue;
+
+        const axes = source.gamepad.axes;
+        // Na maioria dos controles WebXR (Quest):
+        // axes[2] = Analógico eixo X (Esquerda/Direita)
+        // axes[3] = Analógico eixo Y (Cima/Baixo)
+        
+        if (axes.length >= 4) {
+          const xAxis = axes[2];
+          const yAxis = axes[3];
+
+          // Zona morta (Deadzone) para evitar pequenos desvios de hardware
+          if (Math.abs(xAxis) > 0.1 || Math.abs(yAxis) > 0.1) {
+            
+            // Queremos andar na direção que a cabeça está olhando, não o mundo global.
+            // Pegamos a direção "Frente" (Z=-1) e "Direita" (X=1) relativas à câmera
+            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+            forward.y = 0; // Trava o eixo Y para não voar nem afundar no chão
+            forward.normalize();
+
+            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+            right.y = 0;
+            right.normalize();
+
+            // Velocidade de movimento
+            const speed = 3.0 * dt; 
+
+            // Move o playerRig baseado no input do analógico
+            // yAxis negativo = para frente. 
+            playerRig.position.add(forward.multiplyScalar(-yAxis * speed));
+            playerRig.position.add(right.multiplyScalar(xAxis * speed));
+          }
+        }
+      }
+    }
+
+    function animate() {
+      const dt = clock.getDelta();
+
+      // Processa o movimento se estiver no VR
+      if (renderer.xr.isPresenting) {
+        handleLocomotion(dt);
+      }
+
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
