@@ -87,17 +87,16 @@
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:rgba(201,168,106,.35);border-radius:4px;}
   @media(max-width:640px){#controls-cluster{max-width:100vw;}.pill-btn{padding:9px 12px;font-size:10px;}#modal .modal-top{padding:24px 22px 14px;}#modal .modal-body{padding:20px 22px 28px;font-size:1.05rem;}}
-  /* retículo 3D para o controlador VR */
   #vr-reticle {
     position: absolute;
     pointer-events: none;
     z-index: 18;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle, #e8d5a8 0%, rgba(201,168,106,0.3) 80%, transparent 100%);
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #e8d5a8 0%, rgba(201,168,106,0.4) 70%, transparent 100%);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 20px rgba(201,168,106,0.8);
+    box-shadow: 0 0 24px rgba(201,168,106,0.8);
     display: none;
   }
   .webxr-active #vr-reticle { display: block; }
@@ -116,8 +115,6 @@
 <div id="modal-backdrop"><div id="modal"><button id="modal-close">✕</button><div class="modal-top"><div class="emblem-wrap"><svg id="modal-emblem" viewBox="0 0 40 40"></svg></div><div><div class="field" id="modal-field">Campo</div><h2 id="modal-name">Nome</h2><div class="years" id="modal-years">0000–0000</div></div></div><div class="modal-body"><p id="modal-desc"></p><div class="fact" id="modal-fact"></div></div></div></div>
 <div id="credit-tooltip"><span class="lbl">estrela dedicada a</span><span id="credit-tooltip-name">—</span></div>
 <div id="credits-panel"><div class="eyebrow">Homenagem</div><h2>Céu de Créditos</h2><div class="sub">Sete estrelas foram acesas sobre o museu em homenagem a quem tornou este projeto possível. Olhe para cima na sala, ou toque em um nome abaixo.</div><div id="credit-list"></div></div>
-
-<!-- retículo VR (overlay) -->
 <div id="vr-reticle"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -132,9 +129,16 @@ const CREDITS=['Diego','Diogo','Eduardo','Rodrigo','Alexandre','Lucas','Karlos A
 const container=document.getElementById('canvas-container');
 const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x0a0f1e,0.028);
 const camera=new THREE.PerspectiveCamera(66,window.innerWidth/window.innerHeight,0.1,500);camera.position.set(0,1.65,6.5);
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(window.innerWidth,window.innerHeight);renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.xr.enabled=true;container.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setClearColor(0x0a0f1e); // fundo azul escuro, não preto
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.xr.enabled=true;
+container.appendChild(renderer.domElement);
 
-// --- retículo VR (overlay) ---
 const vrReticle = document.getElementById('vr-reticle');
 
 function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
@@ -149,7 +153,10 @@ const wallGeo=new THREE.CylinderGeometry(ROOM_R,ROOM_R,8,64,1,true);const wallMa
 const ceilingGeo=new THREE.RingGeometry(4.2,ROOM_R,64);const ceilingMat=new THREE.MeshStandardMaterial({color:0x131a30,roughness:0.8,side:THREE.DoubleSide});const ceiling=new THREE.Mesh(ceilingGeo,ceilingMat);ceiling.rotation.x=Math.PI/2;ceiling.position.y=8;scene.add(ceiling);
 const rimGeo=new THREE.TorusGeometry(4.2,0.06,12,64);const rimMat=new THREE.MeshBasicMaterial({color:0xc9a86a});const rim=new THREE.Mesh(rimGeo,rimMat);rim.rotation.x=Math.PI/2;rim.position.y=8;scene.add(rim);
 const colGeo=new THREE.CylinderGeometry(0.35,0.4,8,16);const colMat=new THREE.MeshStandardMaterial({color:0x1c2338,roughness:0.6});for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;const col=new THREE.Mesh(colGeo,colMat);col.position.set(Math.cos(a)*(ROOM_R-0.4),4,Math.sin(a)*(ROOM_R-0.4));col.castShadow=true;scene.add(col);}
-scene.add(new THREE.AmbientLight(0x8fa0d0,0.35));scene.add(new THREE.HemisphereLight(0x9db4ff,0x1a1024,0.5));const moonLight=new THREE.PointLight(0xbcd0ff,0.9,30,2);moonLight.position.set(0,9,0);scene.add(moonLight);
+scene.add(new THREE.AmbientLight(0x8fa0d0,0.65)); // mais luz ambiente
+scene.add(new THREE.HemisphereLight(0x9db4ff,0x1a1024,0.6));
+const moonLight=new THREE.PointLight(0xbcd0ff,1.2,30,2); // mais intensa
+moonLight.position.set(0,9,0);scene.add(moonLight);
 function titleTexture(){const c=makeCanvas(512,128),ctx=c.getContext('2d');ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='italic 600 44px "Playfair Display", serif';ctx.fillStyle='rgba(242,236,221,0.92)';ctx.shadowColor='rgba(201,168,106,0.6)';ctx.shadowBlur=24;ctx.fillText('Mulheres na Ciência',256,65);ctx.shadowBlur=0;ctx.font='400 14px "Space Mono", monospace';ctx.fillStyle='rgba(169,143,209,0.85)';ctx.fillText('D  I  A    D  ·    M U S E U   V I R T U A L',256,105);return new THREE.CanvasTexture(c);}
 const titleMat=new THREE.SpriteMaterial({map:titleTexture(),transparent:true});const titleSprite=new THREE.Sprite(titleMat);titleSprite.scale.set(6,1.5,1);titleSprite.position.set(0,3.4,0);scene.add(titleSprite);
 const interactiveObjects=[];
@@ -202,10 +209,8 @@ let autoTourActive=false;let autoTourAngle=Math.atan2(player.position.x,player.p
 function updateAutoTour(dt){if(!autoTourActive)return;autoTourAngle+=dt*0.18;const r=8.6;player.position.set(Math.sin(autoTourAngle)*r,EYE_HEIGHT,Math.cos(autoTourAngle)*r);player.yaw=autoTourAngle;player.pitch=THREE.MathUtils.lerp(player.pitch,-0.02,0.04);}
 
 // ========== CORREÇÕES VR ==========
-// Botão "Entrar em VR" – WebXR com suporte a controladores e gesto de pinça
 const btnNativeVR = document.getElementById('btn-nativevr');
-let vrControllers = []; // armazenar os grupos dos controladores
-let vrReticlePos = new THREE.Vector3(); // posição do retículo 3D (overlay)
+let vrControllers = [];
 
 btnNativeVR.addEventListener('click', async () => {
     if (!navigator.xr) {
@@ -219,20 +224,20 @@ btnNativeVR.addEventListener('click', async () => {
         renderer.xr.setSession(session);
         document.body.classList.add('webxr-active');
 
-        // Criar controladores e adicionar à cena
-        const controller1 = renderer.xr.getController(0); // direita
-        const controller2 = renderer.xr.getController(1); // esquerda
+        // Ajustar a câmera para a posição do jogador antes de iniciar
+        // Isso garante que o headset comece no centro da sala
+        camera.position.copy(player.position);
+        camera.quaternion.setFromEuler(new THREE.Euler(player.pitch, player.yaw, 0, 'YXZ'));
+
+        const controller1 = renderer.xr.getController(0);
+        const controller2 = renderer.xr.getController(1);
         scene.add(controller1);
         scene.add(controller2);
         vrControllers = [controller1, controller2];
 
-        // Evento 'select' (gatilho / pinça) – faz o raycast a partir do controlador
         controller1.addEventListener('select', (event) => onControllerSelect(event));
         controller2.addEventListener('select', (event) => onControllerSelect(event));
 
-        // Opcional: evento 'squeeze' (agarre) também pode ser usado, mas 'select' é o padrão para clique
-
-        // Quando a sessão terminar, limpar
         session.addEventListener('end', () => {
             document.body.classList.remove('webxr-active');
             vrControllers.forEach(c => scene.remove(c));
@@ -250,16 +255,12 @@ btnNativeVR.addEventListener('click', async () => {
     }
 });
 
-// Função chamada quando o usuário faz o gesto de pinça (select)
 function onControllerSelect(event) {
     const controller = event.target;
-    // Obter posição e direção do controlador no mundo
     const origin = new THREE.Vector3();
     const direction = new THREE.Vector3();
     controller.getWorldPosition(origin);
     controller.getWorldDirection(direction);
-
-    // Raycast a partir do controlador
     raycaster.set(origin, direction);
     const hits = raycaster.intersectObjects(interactiveObjects, false);
     if (hits.length > 0) {
@@ -267,26 +268,22 @@ function onControllerSelect(event) {
     }
 }
 
-// Atualizar posição do retículo VR (overlay) para acompanhar o controlador direito
 function updateVrReticle() {
     if (!document.body.classList.contains('webxr-active') || vrControllers.length === 0) {
         vrReticle.style.display = 'none';
         return;
     }
-    // Usamos o controlador direito (índice 0) como referência
     const controller = vrControllers[0];
     if (!controller) return;
     const origin = new THREE.Vector3();
     const direction = new THREE.Vector3();
     controller.getWorldPosition(origin);
     controller.getWorldDirection(direction);
-    // Projetar um ponto a 2 metros à frente do controlador
     const target = origin.clone().add(direction.clone().multiplyScalar(2));
-    // Projetar para tela
     target.project(camera);
     const x = (target.x * 0.5 + 0.5) * window.innerWidth;
     const y = (-target.y * 0.5 + 0.5) * window.innerHeight;
-    if (target.z < 1) { // só mostrar se estiver à frente da câmera
+    if (target.z < 1) {
         vrReticle.style.display = 'block';
         vrReticle.style.left = x + 'px';
         vrReticle.style.top = y + 'px';
@@ -295,7 +292,7 @@ function updateVrReticle() {
     }
 }
 
-// Modo Stereo (Cardboard) – inalterado, mas compatível
+// ========== STEREO (Cardboard) – inalterado ==========
 const stereoContainer = document.getElementById('stereo-container');
 const stereoLeftEl = document.getElementById('stereo-left');
 const stereoRightEl = document.getElementById('stereo-right');
@@ -453,7 +450,7 @@ function updateGaze(dt) {
     document.querySelectorAll('.stereo-reticle .fill').forEach(f => f.style.setProperty('--p', pct));
 }
 
-// Loop de animação unificado
+// ========== LOOP PRINCIPAL ==========
 const clock = new THREE.Clock();
 
 function animate() {
@@ -464,15 +461,13 @@ function animate() {
     twinkleCreditStars(elapsed);
     moonLight.position.x = Math.sin(elapsed * 0.05) * 2;
 
-    // Se estiver em WebXR (VR imersivo)
     if (renderer.xr.isPresenting) {
-        // Atualiza o retículo do controlador
+        // Em VR: atualiza o retículo do controlador e deixa o Three.js renderizar
         updateVrReticle();
-        // O renderer já renderiza automaticamente, não precisamos chamar render aqui
+        // Não chamamos render() manualmente
         return;
     }
 
-    // Modo stereo (Cardboard)
     if (stereoActive) {
         if (deviceControls) {
             deviceControls.update();
@@ -500,7 +495,7 @@ function animate() {
         return;
     }
 
-    // Modo normal (desktop/móvel sem VR)
+    // Modo normal
     updatePlayerMovement(dt);
     updateAutoTour(dt);
     applyPlayerToCamera();
