@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Museu Virtual — Mulheres na Ciência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Cormorant+Garamond:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#050810;--navy:#0a0f1e;--navy-2:#111a30;--gold:#c9a86a;--gold-soft:#e8d5a8;--plum:#7d5ba6;--plum-soft:#a98fd1;--cream:#f2ecdd;--cream-dim:#c9c2ae;--line:rgba(201,168,106,0.28);}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden;background:var(--ink);color:var(--cream);font-family:'Cormorant Garamond',serif;}
+  h1,h2,h3,.display{font-family:'Playfair Display',serif;}
+  .mono{font-family:'Space Mono',monospace;letter-spacing:.04em;}
+  #canvas-container{position:fixed;inset:0;z-index:1;}
+  canvas{display:block;touch-action:none;}
+  #loading{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50%40%,#131c33 0%,#050810 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 1s ease,visibility 1s ease;}
+  #loading.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+  .orbit-loader{width:64px;height:64px;position:relative;}
+  .orbit-loader div{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-top-color:var(--gold);animation:spin 1.6s linear infinite;}
+  .orbit-loader div:nth-child(2){inset:10px;border-top-color:var(--plum-soft);animation-duration:2.2s;animation-direction:reverse;}
+  .orbit-loader div:nth-child(3){inset:20px;border-top-color:var(--cream-dim);animation-duration:1.1s;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #loading .label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.25em;color:var(--gold-soft);text-transform:uppercase;}
+  #loading .lead{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--cream);text-align:center;padding:0 20px;}
+  #ui-top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:flex-start;padding:22px 26px;pointer-events:none;background:linear-gradient(to bottom,rgba(5,8,16,.75),rgba(5,8,16,0));}
+  #brand{pointer-events:auto;}
+  #brand .eyebrow{font-size:10.5px;letter-spacing:.32em;color:var(--gold-soft);text-transform:uppercase;opacity:.85;}
+  #brand h1{margin:4px 0 0;font-size:clamp(1.15rem,2.4vw,1.65rem);font-weight:600;color:var(--cream);letter-spacing:.01em;}
+  #brand h1 span{color:var(--gold);font-style:italic;font-weight:500;}
+  #controls-cluster{display:flex;gap:10px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;max-width:60vw;}
+  .pill-btn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;background:rgba(17,26,48,.72);border:1px solid var(--line);color:var(--cream);padding:10px 16px;border-radius:999px;cursor:pointer;backdrop-filter:blur(6px);display:flex;align-items:center;gap:8px;white-space:nowrap;transition:border-color .25s,background .25s,transform .15s;}
+  .pill-btn:hover{border-color:var(--gold);background:rgba(30,40,66,.85);transform:translateY(-1px);}
+  .pill-btn.active{border-color:var(--gold);background:rgba(201,168,106,.16);color:var(--gold-soft);}
+  .pill-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--plum-soft);}
+  #hint-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;display:flex;justify-content:center;padding:20px 16px 26px;background:linear-gradient(to top,rgba(5,8,16,.8),rgba(5,8,16,0));}
+  #hint-bar .box{pointer-events:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--cream-dim);background:rgba(10,15,30,.55);border:1px solid var(--line);padding:10px 18px;border-radius:999px;backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;letter-spacing:.03em;}
+  #hint-bar .box b{color:var(--gold-soft);font-weight:400;}
+  #reticle{position:fixed;top:50%;left:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:1.5px solid rgba(242,236,221,.55);z-index:19;pointer-events:none;display:none;}
+  #reticle .fill{position:absolute;inset:-1.5px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--p,0)*1%),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));}
+  #modal-backdrop{position:fixed;inset:0;z-index:40;background:rgba(3,5,10,.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;padding:24px;}
+  #modal-backdrop.open{opacity:1;pointer-events:auto;}
+  #modal{width:min(640px,92vw);max-height:82vh;overflow:auto;background:linear-gradient(180deg,#131c33 0%,#0c1224 100%);border:1px solid var(--line);border-radius:6px;position:relative;transform:translateY(18px) scale(.98);transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 30px 80px rgba(0,0,0,.55);}
+  #modal-backdrop.open #modal{transform:translateY(0) scale(1);}
+  #modal .modal-top{padding:30px 34px 18px;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:center;}
+  #modal .emblem-wrap{width:72px;height:72px;min-width:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(201,168,106,.28),rgba(125,91,166,.12)60%,transparent 75%);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+  #modal .emblem-wrap svg{width:40px;height:40px;}
+  #modal .field{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--plum-soft);margin-bottom:6px;}
+  #modal h2{margin:0;font-size:clamp(1.3rem,3vw,1.75rem);color:var(--cream);font-weight:600;}
+  #modal .years{font-family:'Space Mono',monospace;font-size:12px;color:var(--gold-soft);margin-top:4px;}
+  #modal .modal-body{padding:26px 34px 34px;font-size:1.18rem;line-height:1.65;color:var(--cream-dim);}
+  #modal .modal-body p{margin:0 0 16px;}
+  #modal .modal-body .fact{margin-top:10px;padding:14px 18px;border-left:2px solid var(--gold);background:rgba(201,168,106,.06);font-style:italic;color:var(--gold-soft);font-size:1.08rem;}
+  #modal-close{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,.2);color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;transition:border-color .2s,transform .2s;}
+  #modal-close:hover{border-color:var(--gold);transform:rotate(90deg);}
+  #credit-tooltip{position:fixed;z-index:35;transform:translate(-50%,-120%);background:linear-gradient(180deg,#131c33,#0c1224);border:1px solid var(--gold);padding:10px 18px;border-radius:5px;font-family:'Space Mono',monospace;font-size:12px;color:var(--gold-soft);letter-spacing:.05em;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.5);}
+  #credit-tooltip.show{opacity:1;}
+  #credit-tooltip .lbl{color:var(--cream-dim);font-size:9.5px;letter-spacing:.2em;display:block;margin-bottom:3px;}
+  #credits-panel{position:fixed;top:0;right:0;bottom:0;z-index:30;width:min(340px,86vw);background:linear-gradient(180deg,#0c1224 0%,#070a14 100%);border-left:1px solid var(--line);transform:translateX(100%);transition:transform .5s cubic-bezier(.2,.8,.2,1);padding:90px 30px 30px;overflow-y:auto;}
+  #credits-panel.open{transform:translateX(0);}
+  #credits-panel .eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.3em;color:var(--plum-soft);text-transform:uppercase;}
+  #credits-panel h2{margin:8px 0 6px;font-size:1.5rem;color:var(--cream);}
+  #credits-panel .sub{color:var(--cream-dim);font-size:1.02rem;margin-bottom:26px;line-height:1.5;}
+  .credit-star-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(201,168,106,.14);cursor:pointer;}
+  .credit-star-item .glyph{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px 2px rgba(201,168,106,.6);flex:none;}
+  .credit-star-item .name{font-family:'Playfair Display',serif;font-size:1.12rem;color:var(--cream);font-style:italic;}
+  .credit-star-item:hover .name{color:var(--gold-soft);}
+  #stereo-container{position:fixed;inset:0;z-index:15;display:none;}
+  #stereo-container.on{display:flex;}
+  .stereo-half{flex:1;position:relative;overflow:hidden;}
+  .stereo-half:first-child{border-right:1px solid #000;}
+  .stereo-reticle{position:absolute;top:50%;left:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:1.5px solid rgba(242,236,221,.6);pointer-events:none;}
+  .stereo-reticle .fill{position:absolute;inset:-1.5px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--p,0)*1%),transparent 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));}
+  #exit-stereo{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:17;font-family:'Space Mono',monospace;font-size:11px;background:rgba(5,8,16,.7);color:var(--cream);border:1px solid var(--line);padding:8px 16px;border-radius:999px;display:none;cursor:pointer;}
+  #exit-stereo.on{display:block;}
+  #gyro-permission{position:fixed;inset:0;z-index:45;background:rgba(3,5,10,.9);display:none;align-items:center;justify-content:center;padding:24px;text-align:center;}
+  #gyro-permission.show{display:flex;}
+  #gyro-permission .box{max-width:360px;}
+  #gyro-permission h3{color:var(--cream);font-size:1.3rem;margin-bottom:10px;}
+  #gyro-permission p{color:var(--cream-dim);font-size:1.05rem;margin-bottom:20px;line-height:1.5;}
+  #gyro-permission button{font-family:'Space Mono',monospace;background:var(--gold);color:#1a1406;border:none;padding:12px 26px;border-radius:999px;font-size:12px;letter-spacing:.06em;cursor:pointer;}
+  #joystick-base{display:none;position:fixed;left:26px;bottom:30px;z-index:22;width:100px;height:100px;border-radius:50%;background:rgba(17,26,48,.55);border:1px solid var(--line);backdrop-filter:blur(4px);touch-action:none;}
+  body.touch-device #joystick-base{display:block;}
+  #joystick-nub{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(201,168,106,.28);border:1px solid var(--gold);transition:transform .05s linear;}
+  body.touch-device #hint-bar .box{padding-left:130px;}
+  body.touch-device #stereo-container ~ #joystick-base,#stereo-container.on ~ #joystick-base{display:none;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(201,168,106,.35);border-radius:4px;}
+  @media(max-width:640px){#controls-cluster{max-width:100vw;}.pill-btn{padding:9px 12px;font-size:10px;}#modal .modal-top{padding:24px 22px 14px;}#modal .modal-body{padding:20px 22px 28px;font-size:1.05rem;}}
+  /* retículo 3D para o controlador VR */
+  #vr-reticle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 18;
+    width: 12px;
+    height: 12px;
+    background: radial-gradient(circle, #e8d5a8 0%, rgba(201,168,106,0.3) 80%, transparent 100%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(201,168,106,0.8);
+    display: none;
+  }
+  .webxr-active #vr-reticle { display: block; }
+</style>
+</head>
+<body>
+<div id="loading"><div class="orbit-loader"><div></div><div></div><div></div></div><div class="lead">Museu Virtual</div><div class="label">carregando o salão &amp; o céu…</div></div>
+<div id="canvas-container"></div>
+<div id="reticle"><div class="fill"></div></div>
+<div id="ui-top"><div id="brand"><div class="eyebrow">Dia D · Tecnologia</div><h1>Mulheres na <span>Ciência</span></h1></div><div id="controls-cluster"><button class="pill-btn" id="btn-credits"><span class="dot"></span>Créditos</button><button class="pill-btn" id="btn-autorotate"><span class="dot"></span>Passeio automático</button><button class="pill-btn" id="btn-stereo"><span class="dot"></span>Modo VR 🥽</button><button class="pill-btn" id="btn-nativevr"><span class="dot"></span>Entrar em VR</button></div></div>
+<div id="hint-bar"><div class="box" id="hint-text"><b>Arraste</b> para olhar &nbsp;·&nbsp; <b>WASD</b> para andar &nbsp;·&nbsp; <b>Toque / clique</b> numa vitrine para abrir</div></div>
+<button id="exit-stereo">✕ Sair do modo VR</button>
+<div id="stereo-container"><div class="stereo-half" id="stereo-left"><div class="stereo-reticle"><div class="fill"></div></div></div><div class="stereo-half" id="stereo-right"><div class="stereo-reticle"><div class="fill"></div></div></div></div>
+<div id="joystick-base"><div id="joystick-nub"></div></div>
+<div id="gyro-permission"><div class="box"><h3>Ativar sensores de movimento</h3><p>Para a experiência de óculos VR (estilo Cardboard), este dispositivo precisa da sua permissão para usar o giroscópio.</p><button id="gyro-allow">Permitir e entrar em VR</button></div></div>
+<div id="modal-backdrop"><div id="modal"><button id="modal-close">✕</button><div class="modal-top"><div class="emblem-wrap"><svg id="modal-emblem" viewBox="0 0 40 40"></svg></div><div><div class="field" id="modal-field">Campo</div><h2 id="modal-name">Nome</h2><div class="years" id="modal-years">0000–0000</div></div></div><div class="modal-body"><p id="modal-desc"></p><div class="fact" id="modal-fact"></div></div></div></div>
+<div id="credit-tooltip"><span class="lbl">estrela dedicada a</span><span id="credit-tooltip-name">—</span></div>
+<div id="credits-panel"><div class="eyebrow">Homenagem</div><h2>Céu de Créditos</h2><div class="sub">Sete estrelas foram acesas sobre o museu em homenagem a quem tornou este projeto possível. Olhe para cima na sala, ou toque em um nome abaixo.</div><div id="credit-list"></div></div>
+
+<!-- retículo VR (overlay) -->
+<div id="vr-reticle"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/DeviceOrientationControls.js"></script>
+<script>
+(function(){
+"use strict";
+const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+if(IS_TOUCH){document.body.classList.add('touch-device');document.getElementById('hint-text').innerHTML='<b>Arraste</b> para olhar &nbsp;·&nbsp; <b>Joystick</b> para andar &nbsp;·&nbsp; <b>Toque</b> numa vitrine para abrir';}
+const SCIENTISTS=[{id:'curie',name:'Marie Curie',years:'1867 – 1934',field:'Física & Química',emblem:'atom',desc:'Pioneira no estudo da radioatividade — termo que ela mesma cunhou — Marie Curie isolou os elementos polônio e rádio, abrindo caminho para a física nuclear e para a radioterapia moderna.',fact:'É a única pessoa da história a receber o Prêmio Nobel em duas ciências diferentes: Física (1903) e Química (1911).'},{id:'lovelace',name:'Ada Lovelace',years:'1815 – 1852',field:'Matemática & Computação',emblem:'code',desc:'Trabalhando com a Máquina Analítica de Charles Babbage, Ada escreveu notas e algoritmos que hoje são reconhecidos como o primeiro programa de computador da história.',fact:'Ela previu, ainda no século XIX, que máquinas poderiam um dia compor música — quase 200 anos antes da inteligência artificial generativa.'},{id:'franklin',name:'Rosalind Franklin',years:'1920 – 1958',field:'Química & Biofísica',emblem:'helix',desc:'Suas imagens de difração de raios X, especialmente a icônica "Fotografia 51", revelaram a estrutura helicoidal do DNA e foram decisivas para o modelo proposto por Watson e Crick.',fact:'Também investigou vírus e carvão mineral, deixando contribuições fundamentais na cristalografia que só foram plenamente reconhecidas após sua morte.'},{id:'johnson',name:'Katherine Johnson',years:'1918 – 2020',field:'Matemática Aeroespacial',emblem:'orbit',desc:'Matemática da NASA, calculou manualmente as trajetórias que levaram os primeiros astronautas americanos ao espaço, incluindo a órbita do voo de John Glenn e a missão Apollo 11.',fact:'John Glenn só confiou no voo depois que Katherine conferiu, à mão, os cálculos feitos por computador.'},{id:'wu',name:'Chien-Shiung Wu',years:'1912 – 1997',field:'Física Nuclear',emblem:'split',desc:'Conduziu o experimento que derrubou a "lei da paridade", um dos pilares até então intocáveis da física de partículas, mudando a forma como entendemos as forças fundamentais da natureza.',fact:'Apesar de sua descoberta ter rendido o Nobel de 1957 a colegas teóricos, o próprio comitê reconheceu décadas depois que Wu deveria ter sido incluída no prêmio.'},{id:'lamarr',name:'Hedy Lamarr',years:'1914 – 2000',field:'Invenção & Telecomunicações',emblem:'waves',desc:'Atriz de Hollywood e inventora, desenvolveu junto ao compositor George Antheil um sistema de "salto de frequência" para guiar torpedos sem interferência inimiga.',fact:'O princípio que ela patenteou em 1942 é hoje a base tecnológica do Wi-Fi, do Bluetooth e do GPS.'},{id:'tu',name:'Tu Youyou',years:'1930 –',field:'Farmacologia',emblem:'leaf',desc:'Ao revisitar textos da medicina tradicional chinesa, isolou a artemisinina de uma planta medicinal, criando o tratamento mais eficaz contra a malária das últimas décadas.',fact:'Recebeu o Prêmio Nobel de Fisiologia ou Medicina em 2015 sem nunca ter feito doutorado ou trabalhado no exterior — uma trajetória construída inteiramente na China.'},{id:'anning',name:'Mary Anning',years:'1799 – 1847',field:'Paleontologia',emblem:'fossil',desc:'Ainda adolescente, encontrou nos penhascos de Lyme Regis o primeiro esqueleto completo de Ictiossauro, seguido de outros fósseis que ajudaram a fundar a paleontologia moderna.',fact:'Por ser mulher, foi impedida de ingressar na Sociedade Geológica de Londres — sociedade que hoje concede uma medalha anual em sua homenagem.'}];
+const CREDITS=['Diego','Diogo','Eduardo','Rodrigo','Alexandre','Lucas','Karlos André Herculano de Moraes'];
+const container=document.getElementById('canvas-container');
+const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x0a0f1e,0.028);
+const camera=new THREE.PerspectiveCamera(66,window.innerWidth/window.innerHeight,0.1,500);camera.position.set(0,1.65,6.5);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(window.innerWidth,window.innerHeight);renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.xr.enabled=true;container.appendChild(renderer.domElement);
+
+// --- retículo VR (overlay) ---
+const vrReticle = document.getElementById('vr-reticle');
+
+function makeCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function marbleTexture(){const c=makeCanvas(256,256),ctx=c.getContext('2d');ctx.fillStyle='#1c2338';ctx.fillRect(0,0,256,256);const grad=ctx.createRadialGradient(128,128,10,128,128,180);grad.addColorStop(0,'#232c47');grad.addColorStop(1,'#141a2c');ctx.fillStyle=grad;ctx.fillRect(0,0,256,256);ctx.strokeStyle='rgba(201,168,106,0.10)';ctx.lineWidth=1;for(let i=0;i<30;i++){ctx.beginPath();let x=Math.random()*256,y=Math.random()*256;ctx.moveTo(x,y);for(let j=0;j<5;j++){x+=(Math.random()-0.5)*80;y+=(Math.random()-0.5)*80;ctx.lineTo(x,y);}ctx.stroke();}const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(4,4);return tex;}
+function plaqueTexture(sci){const c=makeCanvas(256,320),ctx=c.getContext('2d');const grad=ctx.createLinearGradient(0,0,0,320);grad.addColorStop(0,'#182140');grad.addColorStop(1,'#0d1226');ctx.fillStyle=grad;ctx.fillRect(0,0,256,320);ctx.strokeStyle='#c9a86a';ctx.lineWidth=6;ctx.strokeRect(8,8,240,304);ctx.strokeStyle='rgba(201,168,106,0.5)';ctx.lineWidth=2;ctx.strokeRect(14,14,228,292);const cx=128,cy=130,r=70;const rg=ctx.createRadialGradient(cx-15,cy-20,5,cx,cy,r);rg.addColorStop(0,'rgba(201,168,106,0.35)');rg.addColorStop(0.6,'rgba(125,91,166,0.15)');rg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(201,168,106,0.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();drawEmblem(ctx,sci.emblem,cx,cy,46);ctx.textAlign='center';ctx.fillStyle='#f2ecdd';ctx.font='600 22px "Playfair Display", serif';wrapText(ctx,sci.name,128,240,220,24);ctx.fillStyle='#a98fd1';ctx.font='12px "Space Mono", monospace';ctx.fillText(sci.field.toUpperCase(),128,280);ctx.fillStyle='rgba(242,236,221,0.55)';ctx.font='10px "Space Mono", monospace';ctx.fillText(sci.years,128,300);const tex=new THREE.CanvasTexture(c);tex.anisotropy=4;return tex;}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){const words=text.split(' ');let line='',lines=[];for(let n=0;n<words.length;n++){const test=line+words[n]+' ';if(ctx.measureText(test).width>maxWidth&&n>0){lines.push(line);line=words[n]+' ';}else line=test;}lines.push(line);const startY=y-(lines.length-1)*lineHeight*0.5;lines.forEach((l,i)=>ctx.fillText(l.trim(),x,startY+i*lineHeight));}
+function drawEmblem(ctx,type,cx,cy,s){ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='#e8d5a8';ctx.fillStyle='#e8d5a8';ctx.lineWidth=s*0.045;ctx.lineCap='round';ctx.lineJoin='round';const u=s/100;switch(type){case'atom':ctx.beginPath();ctx.arc(0,0,8*u,0,Math.PI*2);ctx.fill();for(let i=0;i<3;i++){ctx.save();ctx.rotate(i*Math.PI/3);ctx.beginPath();ctx.ellipse(0,0,55*u,22*u,0,0,Math.PI*2);ctx.stroke();ctx.restore();}break;case'code':ctx.font=`${44*u}px "Space Mono", monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('{ }',0,2*u);ctx.beginPath();ctx.moveTo(-50*u,34*u);ctx.lineTo(50*u,34*u);ctx.stroke();break;case'helix':for(let strand=0;strand<2;strand++){ctx.beginPath();for(let t=-1;t<=1.001;t+=0.02){const yy=t*60*u;const xx=Math.sin(t*Math.PI*3+strand*Math.PI)*30*u;if(t<=-1)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}ctx.stroke();}for(let t=-0.9;t<=0.9;t+=0.3){const y1=t*60*u,x1=Math.sin(t*Math.PI*3)*30*u,x2=Math.sin(t*Math.PI*3+Math.PI)*30*u;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y1);ctx.lineWidth=s*0.025;ctx.stroke();ctx.lineWidth=s*0.045;}break;case'orbit':ctx.beginPath();ctx.arc(0,0,7*u,0,Math.PI*2);ctx.fill();ctx.save();ctx.rotate(-0.35);ctx.beginPath();ctx.ellipse(0,0,58*u,26*u,0,0,Math.PI*2);ctx.stroke();const ang=0.9;ctx.translate(Math.cos(ang)*58*u,Math.sin(ang)*26*u);ctx.rotate(ang+Math.PI/2);ctx.beginPath();ctx.moveTo(-8*u,-8*u);ctx.lineTo(8*u,0);ctx.lineTo(-8*u,8*u);ctx.closePath();ctx.fill();ctx.restore();break;case'split':ctx.beginPath();ctx.moveTo(-50*u,0);ctx.lineTo(-8*u,0);ctx.stroke();ctx.beginPath();ctx.moveTo(8*u,0);ctx.lineTo(50*u,0);ctx.stroke();ctx.beginPath();ctx.arc(0,0,10*u,0,Math.PI*2);ctx.stroke();ctx.save();ctx.rotate(2.1);ctx.beginPath();ctx.arc(0,-34*u,6*u,0,Math.PI*2);ctx.fill();ctx.restore();ctx.save();ctx.rotate(-2.4);ctx.beginPath();ctx.arc(0,34*u,6*u,0,Math.PI*2);ctx.fill();ctx.restore();break;case'waves':for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(0,0,(18+i*20)*u,-0.7,0.7);ctx.stroke();ctx.beginPath();ctx.arc(0,0,(18+i*20)*u,Math.PI-0.7,Math.PI+0.7);ctx.stroke();}ctx.beginPath();ctx.arc(0,0,6*u,0,Math.PI*2);ctx.fill();break;case'leaf':ctx.beginPath();ctx.moveTo(0,-55*u);ctx.quadraticCurveTo(48*u,-20*u,0,55*u);ctx.quadraticCurveTo(-48*u,-20*u,0,-55*u);ctx.stroke();ctx.beginPath();ctx.moveTo(0,-50*u);ctx.lineTo(0,50*u);ctx.lineWidth=s*0.025;ctx.stroke();break;case'fossil':ctx.beginPath();for(let t=0;t<=1.001;t+=0.02){const ang2=t*Math.PI*2.4;const rad=6*u+t*46*u;const xx=Math.cos(ang2)*rad,yy=Math.sin(ang2)*rad;if(t===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}ctx.stroke();break;}ctx.restore();}
+const ROOM_R=12.5;
+const floorGeo=new THREE.CircleGeometry(ROOM_R,64);const floorMat=new THREE.MeshStandardMaterial({map:marbleTexture(),roughness:0.45,metalness:0.15});const floor=new THREE.Mesh(floorGeo,floorMat);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+for(let r=3;r<ROOM_R;r+=3){const ringGeo=new THREE.RingGeometry(r-0.02,r,96);const ringMat=new THREE.MeshBasicMaterial({color:0xc9a86a,transparent:true,opacity:0.08,side:THREE.DoubleSide});const ring=new THREE.Mesh(ringGeo,ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=0.01;scene.add(ring);}
+const wallGeo=new THREE.CylinderGeometry(ROOM_R,ROOM_R,8,64,1,true);const wallMat=new THREE.MeshStandardMaterial({color:0x0d1226,roughness:0.9,side:THREE.BackSide});const wall=new THREE.Mesh(wallGeo,wallMat);wall.position.y=4;scene.add(wall);
+const ceilingGeo=new THREE.RingGeometry(4.2,ROOM_R,64);const ceilingMat=new THREE.MeshStandardMaterial({color:0x131a30,roughness:0.8,side:THREE.DoubleSide});const ceiling=new THREE.Mesh(ceilingGeo,ceilingMat);ceiling.rotation.x=Math.PI/2;ceiling.position.y=8;scene.add(ceiling);
+const rimGeo=new THREE.TorusGeometry(4.2,0.06,12,64);const rimMat=new THREE.MeshBasicMaterial({color:0xc9a86a});const rim=new THREE.Mesh(rimGeo,rimMat);rim.rotation.x=Math.PI/2;rim.position.y=8;scene.add(rim);
+const colGeo=new THREE.CylinderGeometry(0.35,0.4,8,16);const colMat=new THREE.MeshStandardMaterial({color:0x1c2338,roughness:0.6});for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;const col=new THREE.Mesh(colGeo,colMat);col.position.set(Math.cos(a)*(ROOM_R-0.4),4,Math.sin(a)*(ROOM_R-0.4));col.castShadow=true;scene.add(col);}
+scene.add(new THREE.AmbientLight(0x8fa0d0,0.35));scene.add(new THREE.HemisphereLight(0x9db4ff,0x1a1024,0.5));const moonLight=new THREE.PointLight(0xbcd0ff,0.9,30,2);moonLight.position.set(0,9,0);scene.add(moonLight);
+function titleTexture(){const c=makeCanvas(512,128),ctx=c.getContext('2d');ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='italic 600 44px "Playfair Display", serif';ctx.fillStyle='rgba(242,236,221,0.92)';ctx.shadowColor='rgba(201,168,106,0.6)';ctx.shadowBlur=24;ctx.fillText('Mulheres na Ciência',256,65);ctx.shadowBlur=0;ctx.font='400 14px "Space Mono", monospace';ctx.fillStyle='rgba(169,143,209,0.85)';ctx.fillText('D  I  A    D  ·    M U S E U   V I R T U A L',256,105);return new THREE.CanvasTexture(c);}
+const titleMat=new THREE.SpriteMaterial({map:titleTexture(),transparent:true});const titleSprite=new THREE.Sprite(titleMat);titleSprite.scale.set(6,1.5,1);titleSprite.position.set(0,3.4,0);scene.add(titleSprite);
+const interactiveObjects=[];
+const pedestalGeo=new THREE.CylinderGeometry(0.55,0.7,1.1,24);const pedestalMat=new THREE.MeshStandardMaterial({color:0x1a2140,roughness:0.5,metalness:0.25});const plaqueGeo=new THREE.PlaneGeometry(1.2,1.5);
+const N=SCIENTISTS.length;const ringR=9.4;
+SCIENTISTS.forEach((sci,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2;const px=Math.cos(a)*ringR,pz=Math.sin(a)*ringR;const pedestal=new THREE.Mesh(pedestalGeo,pedestalMat);pedestal.position.set(px,0.55,pz);pedestal.castShadow=true;pedestal.receiveShadow=true;scene.add(pedestal);const plaqueMat=new THREE.MeshBasicMaterial({map:plaqueTexture(sci),transparent:true});const plaque=new THREE.Mesh(plaqueGeo,plaqueMat);plaque.position.set(px*0.86,1.5,pz*0.86);plaque.lookAt(0,1.5,0);plaque.userData={type:'scientist',data:sci,baseScale:1};scene.add(plaque);interactiveObjects.push(plaque);const spot=new THREE.SpotLight(0xe8d5a8,1.1,9,0.5,0.5,1.4);spot.position.set(px*0.7,5.5,pz*0.7);spot.target=plaque;scene.add(spot);scene.add(spot.target);const glowGeo=new THREE.CircleGeometry(1.1,32);const glowMat=new THREE.MeshBasicMaterial({color:0xc9a86a,transparent:true,opacity:0.10});const glow=new THREE.Mesh(glowGeo,glowMat);glow.rotation.x=-Math.PI/2;glow.position.set(px,0.02,pz);scene.add(glow);});
+const skyGroup=new THREE.Group();scene.add(skyGroup);
+const domeGeo=new THREE.SphereGeometry(90,32,24);const domeMat=new THREE.MeshBasicMaterial({color:0x060814,side:THREE.BackSide});skyGroup.add(new THREE.Mesh(domeGeo,domeMat));
+const starCount=1400;const starGeo=new THREE.BufferGeometry();const starPos=new Float32Array(starCount*3);for(let i=0;i<starCount;i++){const r=60+Math.random()*28;const theta=Math.random()*Math.PI*2;const phi=Math.acos((Math.random()*2)-1)*0.62;starPos[i*3]=r*Math.sin(phi)*Math.cos(theta);starPos[i*3+1]=Math.abs(r*Math.cos(phi))*0.9+4;starPos[i*3+2]=r*Math.sin(phi)*Math.sin(theta);}starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));const starMat=new THREE.PointsMaterial({color:0xdfe6ff,size:0.3,transparent:true,opacity:0.85,sizeAttenuation:true});skyGroup.add(new THREE.Points(starGeo,starMat));
+function haze(color,x,y,z,scale,opacity){const c=makeCanvas(128,128),ctx=c.getContext('2d');const g=ctx.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,color);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);const tex=new THREE.CanvasTexture(c);const mat=new THREE.SpriteMaterial({map:tex,transparent:true,opacity,depthWrite:false});const spr=new THREE.Sprite(mat);spr.scale.set(scale,scale,1);spr.position.set(x,y,z);skyGroup.add(spr);}
+haze('rgba(125,91,166,0.55)',-30,40,-40,60,0.5);haze('rgba(201,168,106,0.35)',40,55,20,55,0.4);haze('rgba(80,110,200,0.4)',10,25,-60,70,0.45);
+function starGlyphTexture(){const c=makeCanvas(64,64),ctx=c.getContext('2d');const g=ctx.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,248,225,1)');g.addColorStop(0.25,'rgba(232,213,168,0.9)');g.addColorStop(1,'rgba(232,213,168,0)');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);}
+const creditStarTex=starGlyphTexture();const creditStars=[];CREDITS.forEach((name,i)=>{const a=(i/CREDITS.length)*Math.PI*2;const r=34+(i%2)*8;const y=30+Math.sin(i*1.7)*10+14;const x=Math.cos(a)*r,z=Math.sin(a)*r;const mat=new THREE.SpriteMaterial({map:creditStarTex,transparent:true,depthWrite:false});const spr=new THREE.Sprite(mat);spr.scale.set(2.6,2.6,1);spr.position.set(x,y,z);spr.userData={type:'credit',data:{name},baseScale:2.6,twinklePhase:Math.random()*Math.PI*2};skyGroup.add(spr);interactiveObjects.push(spr);creditStars.push(spr);});
+const EYE_HEIGHT=1.65;const WALK_SPEED=4.2;const LOOK_SENS=0.0032;const PITCH_LIMIT=1.3;
+const player={position:camera.position.clone(),yaw:0,pitch:-0.04};
+function getForwardVector(yaw){return new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));}
+function getRightVector(yaw){return getForwardVector(yaw).clone().cross(new THREE.Vector3(0,1,0)).normalize();}
+function shortestAngleDelta(a,b){let d=(b-a)%(Math.PI*2);if(d>Math.PI)d-=Math.PI*2;if(d<-Math.PI)d+=Math.PI*2;return d;}
+function resolveCollisions(pos){const maxR=ROOM_R-1.1;const distFromCenter=Math.hypot(pos.x,pos.z);if(distFromCenter>maxR){const k=maxR/distFromCenter;pos.x*=k;pos.z*=k;}SCIENTISTS.forEach((sci,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2;const px=Math.cos(a)*ringR,pz=Math.sin(a)*ringR;const dx=pos.x-px,dz=pos.z-pz,d=Math.hypot(dx,dz),minD=1.05;if(d<minD&&d>0.0001){const k=minD/d;pos.x=px+dx*k;pos.z=pz+dz*k;}});}
+function applyPlayerToCamera(){camera.quaternion.setFromEuler(new THREE.Euler(player.pitch,player.yaw,0,'YXZ'));camera.position.copy(player.position);}
+applyPlayerToCamera();
+const keysDown=new Set();window.addEventListener('keydown',e=>keysDown.add(e.code));window.addEventListener('keyup',e=>keysDown.delete(e.code));
+function keyboardMoveVector(){let x=0,z=0;if(keysDown.has('KeyW')||keysDown.has('ArrowUp'))z+=1;if(keysDown.has('KeyS')||keysDown.has('ArrowDown'))z-=1;if(keysDown.has('KeyD')||keysDown.has('ArrowRight'))x+=1;if(keysDown.has('KeyA')||keysDown.has('ArrowLeft'))x-=1;return{x,z};}
+const joystickBase=document.getElementById('joystick-base');const joystickNub=document.getElementById('joystick-nub');let joyVec={x:0,z:0},joyTouchId=null;const JOY_RADIUS=42;
+function joystickPointFromEvent(e){if(e.changedTouches){for(const t of e.changedTouches)if(t.identifier===joyTouchId)return t;return null;}return e;}
+function joystickStart(e){const t0=e.changedTouches?e.changedTouches[0]:e;joyTouchId=e.changedTouches?t0.identifier:'mouse';joystickMove(e);}
+function joystickMove(e){const t=joystickPointFromEvent(e);if(!t)return;const rect=joystickBase.getBoundingClientRect();const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;let dx=t.clientX-cx,dy=t.clientY-cy;const dist=Math.min(JOY_RADIUS,Math.hypot(dx,dy));const ang=Math.atan2(dy,dx);dx=Math.cos(ang)*dist;dy=Math.sin(ang)*dist;joystickNub.style.transform=`translate(${dx}px,${dy}px)`;joyVec={x:dx/JOY_RADIUS,z:-dy/JOY_RADIUS};}
+function joystickEnd(){joyTouchId=null;joyVec={x:0,z:0};joystickNub.style.transform='translate(0px,0px)';}
+if(joystickBase){joystickBase.addEventListener('touchstart',e=>{e.preventDefault();joystickStart(e);},{passive:false});joystickBase.addEventListener('touchmove',e=>{e.preventDefault();joystickMove(e);},{passive:false});joystickBase.addEventListener('touchend',e=>{e.preventDefault();joystickEnd();},{passive:false});joystickBase.addEventListener('touchcancel',joystickEnd);}
+function updatePlayerMovement(dt){const kb=keyboardMoveVector();const mx=THREE.MathUtils.clamp(kb.x+joyVec.x,-1,1);const mz=THREE.MathUtils.clamp(kb.z+joyVec.z,-1,1);if(mx===0&&mz===0)return;const move=new THREE.Vector3();move.addScaledVector(getForwardVector(player.yaw),mz);move.addScaledVector(getRightVector(player.yaw),mx);if(move.lengthSq()>1)move.normalize();player.position.addScaledVector(move,WALK_SPEED*dt);resolveCollisions(player.position);}
+const raycaster=new THREE.Raycaster();const pointerNDC=new THREE.Vector2();let hovered=null;let lookPointerId=null,lookLastX=0,lookLastY=0,dragMoved=false;
+function setHover(obj){if(hovered===obj)return;if(hovered){animScale(hovered,hovered.userData.baseScale);}hovered=obj;if(hovered){animScale(hovered,hovered.userData.baseScale*1.18);renderer.domElement.style.cursor='pointer';}else renderer.domElement.style.cursor='grab';}
+function animScale(obj,target){obj.userData._targetScale=target;}
+function updatePointer(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect();pointerNDC.x=((clientX-rect.left)/rect.width)*2-1;pointerNDC.y=-((clientY-rect.top)/rect.height)*2+1;}
+function hitTest(){raycaster.setFromCamera(pointerNDC,camera);const hits=raycaster.intersectObjects(interactiveObjects,false);return hits.length?hits[0].object:null;}
+renderer.domElement.addEventListener('mousemove',e=>{if(stereoActive||lookPointerId!==null)return;updatePointer(e.clientX,e.clientY);setHover(hitTest());});
+renderer.domElement.addEventListener('pointerdown',e=>{if(stereoActive)return;lookPointerId=e.pointerId;lookLastX=e.clientX;lookLastY=e.clientY;dragMoved=false;try{renderer.domElement.setPointerCapture(e.pointerId);}catch(err){}});
+renderer.domElement.addEventListener('pointermove',e=>{if(stereoActive||lookPointerId!==e.pointerId)return;const dx=e.clientX-lookLastX,dy=e.clientY-lookLastY;if(Math.abs(dx)>3||Math.abs(dy)>3)dragMoved=true;player.yaw-=dx*LOOK_SENS;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*LOOK_SENS,-PITCH_LIMIT,PITCH_LIMIT);lookLastX=e.clientX;lookLastY=e.clientY;});
+renderer.domElement.addEventListener('pointerup',e=>{if(stereoActive||lookPointerId!==e.pointerId)return;lookPointerId=null;updatePointer(e.clientX,e.clientY);const obj=hitTest();if(obj&&!dragMoved)handleActivate(obj);});
+renderer.domElement.addEventListener('pointercancel',()=>{lookPointerId=null;});
+function handleActivate(obj){if(!obj)return;const ud=obj.userData;if(ud.type==='scientist')openModal(ud.data);else if(ud.type==='credit')showCreditTooltip(ud.data.name,obj);}
+const modalBackdrop=document.getElementById('modal-backdrop');const modalClose=document.getElementById('modal-close');
+function openModal(sci){document.getElementById('modal-name').textContent=sci.name;document.getElementById('modal-years').textContent=sci.years;document.getElementById('modal-field').textContent=sci.field;document.getElementById('modal-desc').textContent=sci.desc;document.getElementById('modal-fact').textContent='✦ '+sci.fact;const emblemSvg=document.getElementById('modal-emblem');emblemSvg.innerHTML='';let imgHolder=document.getElementById('modal-emblem-canvas');if(!imgHolder){imgHolder=document.createElement('canvas');imgHolder.id='modal-emblem-canvas';imgHolder.width=80;imgHolder.height=80;imgHolder.style.width='40px';imgHolder.style.height='40px';emblemSvg.parentNode.appendChild(imgHolder);}const ictx=imgHolder.getContext('2d');ictx.clearRect(0,0,80,80);drawEmblem(ictx,sci.emblem,40,40,34);modalBackdrop.classList.add('open');}
+modalClose.addEventListener('click',()=>modalBackdrop.classList.remove('open'));modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)modalBackdrop.classList.remove('open');});
+const tooltip=document.getElementById('credit-tooltip');
+function showCreditTooltip(name,obj){document.getElementById('credit-tooltip-name').textContent=name;const vec=obj.position.clone().project(camera);const x=(vec.x*0.5+0.5)*window.innerWidth;const y=(-vec.y*0.5+0.5)*window.innerHeight;tooltip.style.left=x+'px';tooltip.style.top=y+'px';tooltip.classList.add('show');clearTimeout(tooltip._t);tooltip._t=setTimeout(()=>tooltip.classList.remove('show'),2600);}
+const creditsPanel=document.getElementById('credits-panel');const creditList=document.getElementById('credit-list');CREDITS.forEach((name,i)=>{const item=document.createElement('div');item.className='credit-star-item';item.innerHTML=`<div class="glyph"></div><div class="name">${name}</div>`;item.addEventListener('click',()=>flyToStar(creditStars[i]));creditList.appendChild(item);});document.getElementById('btn-credits').addEventListener('click',()=>creditsPanel.classList.toggle('open'));
+function flyToStar(star){creditsPanel.classList.remove('open');autoTourActive=false;btnAuto.classList.remove('active');const startPos=player.position.clone();const targetPos=new THREE.Vector3(star.position.x*0.12,EYE_HEIGHT,star.position.z*0.12);resolveCollisions(targetPos);const startYaw=player.yaw,startPitch=player.pitch;const dx=star.position.x-targetPos.x,dz=star.position.z-targetPos.z,dy=star.position.y-targetPos.y;const targetYaw=startYaw+shortestAngleDelta(startYaw,Math.atan2(-dx,-dz));const targetPitch=THREE.MathUtils.clamp(Math.atan2(dy,Math.hypot(dx,dz)),-PITCH_LIMIT,PITCH_LIMIT);const startTime=performance.now();function step(t){const k=Math.min(1,(t-startTime)/1400);const ease=1-Math.pow(1-k,3);player.position.lerpVectors(startPos,targetPos,ease);player.yaw=startYaw+(targetYaw-startYaw)*ease;player.pitch=startPitch+(targetPitch-startPitch)*ease;if(k<1)requestAnimationFrame(step);else showCreditTooltip(star.userData.data.name,star);}requestAnimationFrame(step);}
+let autoTourActive=false;let autoTourAngle=Math.atan2(player.position.x,player.position.z);const btnAuto=document.getElementById('btn-autorotate');btnAuto.addEventListener('click',()=>{autoTourActive=!autoTourActive;btnAuto.classList.toggle('active',autoTourActive);if(autoTourActive)autoTourAngle=Math.atan2(player.position.x,player.position.z);});
+function updateAutoTour(dt){if(!autoTourActive)return;autoTourAngle+=dt*0.18;const r=8.6;player.position.set(Math.sin(autoTourAngle)*r,EYE_HEIGHT,Math.cos(autoTourAngle)*r);player.yaw=autoTourAngle;player.pitch=THREE.MathUtils.lerp(player.pitch,-0.02,0.04);}
+
+// ========== CORREÇÕES VR ==========
+// Botão "Entrar em VR" – WebXR com suporte a controladores e gesto de pinça
+const btnNativeVR = document.getElementById('btn-nativevr');
+let vrControllers = []; // armazenar os grupos dos controladores
+let vrReticlePos = new THREE.Vector3(); // posição do retículo 3D (overlay)
+
+btnNativeVR.addEventListener('click', async () => {
+    if (!navigator.xr) {
+        alert('WebXR não é suportado neste navegador. Tente o modo VR 🥽.');
+        return;
+    }
+    try {
+        const session = await navigator.xr.requestSession('immersive-vr', {
+            optionalFeatures: ['local-floor', 'bounded-floor']
+        });
+        renderer.xr.setSession(session);
+        document.body.classList.add('webxr-active');
+
+        // Criar controladores e adicionar à cena
+        const controller1 = renderer.xr.getController(0); // direita
+        const controller2 = renderer.xr.getController(1); // esquerda
+        scene.add(controller1);
+        scene.add(controller2);
+        vrControllers = [controller1, controller2];
+
+        // Evento 'select' (gatilho / pinça) – faz o raycast a partir do controlador
+        controller1.addEventListener('select', (event) => onControllerSelect(event));
+        controller2.addEventListener('select', (event) => onControllerSelect(event));
+
+        // Opcional: evento 'squeeze' (agarre) também pode ser usado, mas 'select' é o padrão para clique
+
+        // Quando a sessão terminar, limpar
+        session.addEventListener('end', () => {
+            document.body.classList.remove('webxr-active');
+            vrControllers.forEach(c => scene.remove(c));
+            vrControllers = [];
+            if (stereoActive) stopStereo();
+            renderer.xr.setSession(null);
+            applyPlayerToCamera();
+            btnNativeVR.classList.remove('active');
+        });
+
+        btnNativeVR.classList.add('active');
+    } catch (err) {
+        console.error('Falha ao iniciar WebXR:', err);
+        alert('Não foi possível iniciar a sessão VR. Verifique se o dispositivo é compatível e tente novamente.');
+    }
+});
+
+// Função chamada quando o usuário faz o gesto de pinça (select)
+function onControllerSelect(event) {
+    const controller = event.target;
+    // Obter posição e direção do controlador no mundo
+    const origin = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    controller.getWorldPosition(origin);
+    controller.getWorldDirection(direction);
+
+    // Raycast a partir do controlador
+    raycaster.set(origin, direction);
+    const hits = raycaster.intersectObjects(interactiveObjects, false);
+    if (hits.length > 0) {
+        handleActivate(hits[0].object);
+    }
+}
+
+// Atualizar posição do retículo VR (overlay) para acompanhar o controlador direito
+function updateVrReticle() {
+    if (!document.body.classList.contains('webxr-active') || vrControllers.length === 0) {
+        vrReticle.style.display = 'none';
+        return;
+    }
+    // Usamos o controlador direito (índice 0) como referência
+    const controller = vrControllers[0];
+    if (!controller) return;
+    const origin = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    controller.getWorldPosition(origin);
+    controller.getWorldDirection(direction);
+    // Projetar um ponto a 2 metros à frente do controlador
+    const target = origin.clone().add(direction.clone().multiplyScalar(2));
+    // Projetar para tela
+    target.project(camera);
+    const x = (target.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-target.y * 0.5 + 0.5) * window.innerHeight;
+    if (target.z < 1) { // só mostrar se estiver à frente da câmera
+        vrReticle.style.display = 'block';
+        vrReticle.style.left = x + 'px';
+        vrReticle.style.top = y + 'px';
+    } else {
+        vrReticle.style.display = 'none';
+    }
+}
+
+// Modo Stereo (Cardboard) – inalterado, mas compatível
+const stereoContainer = document.getElementById('stereo-container');
+const stereoLeftEl = document.getElementById('stereo-left');
+const stereoRightEl = document.getElementById('stereo-right');
+const exitStereoBtn = document.getElementById('exit-stereo');
+const btnStereo = document.getElementById('btn-stereo');
+const gyroPermEl = document.getElementById('gyro-permission');
+const reticleEl = document.getElementById('reticle');
+let stereoActive = false;
+let deviceControls = null;
+let eyeCamL, eyeCamR;
+const EYE_SEP = 0.032;
+let gazeTarget = null, gazeProgress = 0;
+const GAZE_TIME = 1.1;
+
+function initStereoCameras() {
+    eyeCamL = camera.clone();
+    eyeCamR = camera.clone();
+}
+
+function enableDeviceControls() {
+    if (deviceControls) return;
+    deviceControls = new THREE.DeviceOrientationControls(camera);
+    gyroPermEl.classList.remove('show');
+}
+
+function startStereo() {
+    if (renderer.xr.isPresenting) {
+        alert('Você já está em uma sessão VR imersiva. Use o botão "Entrar em VR" para sair.');
+        return;
+    }
+    if (!eyeCamL) initStereoCameras();
+    stereoContainer.classList.add('on');
+    exitStereoBtn.classList.add('on');
+    reticleEl.style.display = 'none';
+    btnStereo.classList.add('active');
+    stereoActive = true;
+    container.style.display = 'none';
+    resizeStereo();
+
+    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        gyroPermEl.classList.add('show');
+    } else {
+        enableDeviceControls();
+    }
+}
+
+function stopStereo() {
+    stereoContainer.classList.remove('on');
+    exitStereoBtn.classList.remove('on');
+    btnStereo.classList.remove('active');
+    stereoActive = false;
+    container.style.display = 'block';
+    if (deviceControls) {
+        deviceControls.dispose();
+        deviceControls = null;
+    }
+    applyPlayerToCamera();
+    gazeTarget = null;
+    gazeProgress = 0;
+    document.querySelectorAll('.stereo-reticle .fill').forEach(f => f.style.setProperty('--p', 0));
+}
+
+btnStereo.addEventListener('click', () => {
+    if (stereoActive) stopStereo();
+    else startStereo();
+});
+exitStereoBtn.addEventListener('click', stopStereo);
+
+document.getElementById('gyro-allow').addEventListener('click', () => {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => {
+            if (state === 'granted') enableDeviceControls();
+            else {
+                gyroPermEl.classList.remove('show');
+                alert('Permissão negada. Você pode arrastar a tela para olhar ao redor no modo stereo.');
+                enableTouchLookStereo();
+            }
+        }).catch(() => {
+            gyroPermEl.classList.remove('show');
+            enableTouchLookStereo();
+        });
+    } else {
+        enableDeviceControls();
+    }
+});
+
+let stereoTouchId = null;
+let stereoLastX = 0, stereoLastY = 0;
+function enableTouchLookStereo() {
+    [stereoLeftEl, stereoRightEl].forEach(el => {
+        el.addEventListener('touchstart', (e) => {
+            if (!stereoActive) return;
+            const t = e.changedTouches[0];
+            stereoTouchId = t.identifier;
+            stereoLastX = t.clientX;
+            stereoLastY = t.clientY;
+        }, {passive: true});
+        el.addEventListener('touchmove', (e) => {
+            if (!stereoActive || stereoTouchId === null) return;
+            const t = Array.from(e.changedTouches).find(t => t.identifier === stereoTouchId);
+            if (!t) return;
+            const dx = t.clientX - stereoLastX;
+            const dy = t.clientY - stereoLastY;
+            player.yaw -= dx * LOOK_SENS * 0.5;
+            player.pitch = THREE.MathUtils.clamp(player.pitch - dy * LOOK_SENS * 0.5, -PITCH_LIMIT, PITCH_LIMIT);
+            stereoLastX = t.clientX;
+            stereoLastY = t.clientY;
+            applyPlayerToCamera();
+        }, {passive: true});
+        el.addEventListener('touchend', (e) => {
+            if (Array.from(e.changedTouches).some(t => t.identifier === stereoTouchId)) {
+                stereoTouchId = null;
+            }
+        }, {passive: true});
+        el.addEventListener('touchcancel', () => { stereoTouchId = null; }, {passive: true});
+    });
+}
+
+function resizeStereo() {
+    const w = stereoLeftEl.clientWidth;
+    const h = stereoLeftEl.clientHeight;
+    if (rendererStereoL) {
+        rendererStereoL.setSize(w, h, false);
+        rendererStereoR.setSize(w, h, false);
+    }
+}
+
+const rendererStereoL = new THREE.WebGLRenderer({antialias: true});
+const rendererStereoR = new THREE.WebGLRenderer({antialias: true});
+[rendererStereoL, rendererStereoR].forEach(r => {
+    r.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    r.outputEncoding = THREE.sRGBEncoding;
+});
+stereoLeftEl.appendChild(rendererStereoL.domElement);
+stereoRightEl.appendChild(rendererStereoR.domElement);
+
+function updateGaze(dt) {
+    if (!stereoActive) return;
+    pointerNDC.set(0, 0);
+    raycaster.setFromCamera(pointerNDC, camera);
+    const hits = raycaster.intersectObjects(interactiveObjects, false);
+    const obj = hits.length ? hits[0].object : null;
+    if (obj && obj === gazeTarget) {
+        gazeProgress += dt / GAZE_TIME;
+        if (gazeProgress >= 1) {
+            gazeProgress = 0;
+            handleActivate(obj);
+            gazeTarget = null;
+        }
+    } else {
+        gazeTarget = obj;
+        gazeProgress = obj ? dt / GAZE_TIME : 0;
+    }
+    const pct = gazeTarget ? Math.min(100, gazeProgress * 100) : 0;
+    document.querySelectorAll('.stereo-reticle .fill').forEach(f => f.style.setProperty('--p', pct));
+}
+
+// Loop de animação unificado
+const clock = new THREE.Clock();
+
+function animate() {
+    const dt = Math.min(clock.getDelta(), 0.1);
+    const elapsed = clock.elapsedTime;
+
+    animateSmoothScales();
+    twinkleCreditStars(elapsed);
+    moonLight.position.x = Math.sin(elapsed * 0.05) * 2;
+
+    // Se estiver em WebXR (VR imersivo)
+    if (renderer.xr.isPresenting) {
+        // Atualiza o retículo do controlador
+        updateVrReticle();
+        // O renderer já renderiza automaticamente, não precisamos chamar render aqui
+        return;
+    }
+
+    // Modo stereo (Cardboard)
+    if (stereoActive) {
+        if (deviceControls) {
+            deviceControls.update();
+        }
+        updateGaze(dt);
+        if (!eyeCamL) initStereoCameras();
+        eyeCamL.fov = eyeCamR.fov = camera.fov;
+        eyeCamL.near = eyeCamR.near = camera.near;
+        eyeCamL.far = eyeCamR.far = camera.far;
+        const wL = stereoLeftEl.clientWidth, hL = stereoLeftEl.clientHeight;
+        eyeCamL.aspect = eyeCamR.aspect = wL / hL;
+        eyeCamL.updateProjectionMatrix();
+        eyeCamR.updateProjectionMatrix();
+        eyeCamL.position.copy(camera.position);
+        eyeCamR.position.copy(camera.position);
+        eyeCamL.quaternion.copy(camera.quaternion);
+        eyeCamR.quaternion.copy(camera.quaternion);
+        const offset = new THREE.Vector3(EYE_SEP, 0, 0).applyQuaternion(camera.quaternion);
+        eyeCamL.position.sub(offset);
+        eyeCamR.position.add(offset);
+        rendererStereoL.setSize(wL, hL, false);
+        rendererStereoR.setSize(wL, hL, false);
+        rendererStereoL.render(scene, eyeCamL);
+        rendererStereoR.render(scene, eyeCamR);
+        return;
+    }
+
+    // Modo normal (desktop/móvel sem VR)
+    updatePlayerMovement(dt);
+    updateAutoTour(dt);
+    applyPlayerToCamera();
+    renderer.render(scene, camera);
+}
+
+function animateSmoothScales() {
+    interactiveObjects.forEach(o => {
+        const t = o.userData._targetScale;
+        if (t !== undefined) {
+            const cur = o.scale.x;
+            const next = THREE.MathUtils.lerp(cur, t, 0.18);
+            o.scale.set(next, next, 1);
+        }
+    });
+}
+
+function twinkleCreditStars(elapsed) {
+    creditStars.forEach(s => {
+        const ph = s.userData.twinklePhase;
+        const k = 0.85 + Math.sin(elapsed * 1.4 + ph) * 0.15;
+        s.material.opacity = k;
+    });
+}
+
+renderer.setAnimationLoop(animate);
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    resizeStereo();
+});
+
+setTimeout(() => document.getElementById('loading').classList.add('hidden'), 900);
+
+})();
+</script>
+</body>
+</html>
