@@ -14,7 +14,7 @@
   .mono{font-family:'Space Mono',monospace;letter-spacing:.04em;}
   #canvas-container{position:fixed;inset:0;z-index:1;}
   canvas{display:block;touch-action:none;}
-  #loading{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50%40%,#131c33 0%,#050810 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 1s ease,visibility 1s ease;}
+  #loading{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50% 40%,#131c33 0%,#050810 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 1s ease,visibility 1s ease;}
   #loading.hidden{opacity:0;visibility:hidden;pointer-events:none;}
   .orbit-loader{width:64px;height:64px;position:relative;}
   .orbit-loader div{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-top-color:var(--gold);animation:spin 1.6s linear infinite;}
@@ -36,13 +36,13 @@
   #hint-bar{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;display:flex;justify-content:center;padding:20px 16px 26px;background:linear-gradient(to top,rgba(5,8,16,.8),rgba(5,8,16,0));}
   #hint-bar .box{pointer-events:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--cream-dim);background:rgba(10,15,30,.55);border:1px solid var(--line);padding:10px 18px;border-radius:999px;backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;letter-spacing:.03em;}
   #hint-bar .box b{color:var(--gold-soft);font-weight:400;}
+  #reticle{position:fixed;top:50%;left:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:1.5px solid rgba(242,236,221,.55);z-index:19;pointer-events:none;display:none;}
   #modal-backdrop{position:fixed;inset:0;z-index:40;background:rgba(3,5,10,.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s ease;padding:24px;}
   #modal-backdrop.open{opacity:1;pointer-events:auto;}
   #modal{width:min(640px,92vw);max-height:82vh;overflow:auto;background:linear-gradient(180deg,#131c33 0%,#0c1224 100%);border:1px solid var(--line);border-radius:6px;position:relative;transform:translateY(18px) scale(.98);transition:transform .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 30px 80px rgba(0,0,0,.55);}
   #modal-backdrop.open #modal{transform:translateY(0) scale(1);}
   #modal .modal-top{padding:30px 34px 18px;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:center;}
-  #modal .emblem-wrap{width:72px;height:72px;min-width:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(201,168,106,.28),rgba(125,91,166,.12)60%,transparent 75%);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
-  #modal .emblem-wrap svg{width:40px;height:40px;}
+  #modal .emblem-wrap{width:72px;height:72px;min-width:72px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(201,168,106,.28),rgba(125,91,166,.12) 60%,transparent 75%);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
   #modal .field{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--plum-soft);margin-bottom:6px;}
   #modal h2{margin:0;font-size:clamp(1.3rem,3vw,1.75rem);color:var(--cream);font-weight:600;}
   #modal .years{font-family:'Space Mono',monospace;font-size:12px;color:var(--gold-soft);margin-top:4px;}
@@ -70,12 +70,13 @@
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:rgba(201,168,106,.35);border-radius:4px;}
   @media(max-width:640px){#controls-cluster{max-width:100vw;}.pill-btn{padding:9px 12px;font-size:10px;}#modal .modal-top{padding:24px 22px 14px;}#modal .modal-body{padding:20px 22px 28px;font-size:1.05rem;}}
+  
   body.xr-active {
     background: transparent !important;
   }
   body.xr-active #ui-top,
-  body.xr-active #joystick-base,
-  body.xr-active #hint-bar {
+  body.xr-active #hint-bar,
+  body.xr-active #joystick-base {
     display: none !important;
   }
 </style>
@@ -83,19 +84,21 @@
 <body>
 <div id="loading"><div class="orbit-loader"><div></div><div></div><div></div></div><div class="lead">Museu Virtual</div><div class="label">carregando o salão &amp; o céu…</div></div>
 <div id="canvas-container"></div>
-<div id="ui-top"><div id="brand"><div class="eyebrow">Dia D · Tecnologia</div><h1>Mulheres na <span>Ciência</span></h1></div><div id="controls-cluster"><button class="pill-btn" id="btn-credits"><span class="dot"></span>Créditos</button><button class="pill-btn" id="btn-autorotate"><span class="dot"></span>Passeio automático</button><button class="pill-btn" id="btn-nativevr"><span class="dot"></span>Entrar em VR</button></div></div>
+<div id="reticle"><div class="fill"></div></div>
+<div id="ui-top"><div id="brand"><div class="eyebrow">Dia D · Tecnologia</div><h1>Mulheres na <span>Ciência</span></h1></div><div id="controls-cluster"><button class="pill-btn" id="btn-credits"><span class="dot"></span>Créditos</button><button class="pill-btn" id="btn-autorotate"><span class="dot"></span>Passeio automático</button><button class="pill-btn" id="btn-nativevr"><span class="dot"></span>Entrar em VR 🥽</button></div></div>
 <div id="hint-bar"><div class="box" id="hint-text"><b>Arraste</b> para olhar &nbsp;·&nbsp; <b>WASD</b> para andar &nbsp;·&nbsp; <b>Toque / clique</b> numa vitrine para abrir</div></div>
 <div id="joystick-base"><div id="joystick-nub"></div></div>
 <div id="modal-backdrop"><div id="modal"><button id="modal-close">✕</button><div class="modal-top"><div class="emblem-wrap"><svg id="modal-emblem" viewBox="0 0 40 40"></svg></div><div><div class="field" id="modal-field">Campo</div><h2 id="modal-name">Nome</h2><div class="years" id="modal-years">0000–0000</div></div></div><div class="modal-body"><p id="modal-desc"></p><div class="fact" id="modal-fact"></div></div></div></div>
 <div id="credit-tooltip"><span class="lbl">estrela dedicada a</span><span id="credit-tooltip-name">—</span></div>
 <div id="credits-panel"><div class="eyebrow">Homenagem</div><h2>Céu de Créditos</h2><div class="sub">Sete estrelas foram acesas sobre o museu em homenagem a quem tornou este projeto possível. Olhe para cima na sala, ou toque em um nome abaixo.</div><div id="credit-list"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 "use strict";
 const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
 if(IS_TOUCH){document.body.classList.add('touch-device');document.getElementById('hint-text').innerHTML='<b>Arraste</b> para olhar &nbsp;·&nbsp; <b>Joystick</b> para andar &nbsp;·&nbsp; <b>Toque</b> numa vitrine para abrir';}
-const SCIENTISTS=[{id:'curie',name:'Marie Curie',years:'1867 – 1934',field:'Física & Química',emblem:'atom',desc:'Pioneira no estudo da radioatividade — termo que ela mesma cunhou — Marie Curie isolou os elementos polônio e rádio, abrindo caminho para a física nuclear e para a radioterapia moderna.',fact:'É a única pessoa da história a receber o Prêmio Nobel em duas ciências diferentes: Física (1903) e Química (1911).'},{id:'lovelace',name:'Ada Lovelace',years:'1815 – 1852',field:'Matemática & Computação',emblem:'code',desc:'Trabalhando com a Máquina Analítica de Charles Babbage, Ada escreveu notas e algoritmos que hoje são reconhecidos como o primeiro programa de computador da história.',fact:'Ela previu, ainda no século XIX, que máquinas poderiam um dia compor música — quase 200 anos antes da inteligência artificial generativa.'},{id:'franklin',name:'Rosalind Franklin',years:'1920 – 1958',field:'Química & Biofísica',emblem:'helix',desc:'Suas imagens de difração de raios X, especialmente a icônica "Fotografia 51", revelaram a estrutura helicoidal do DNA e foram decisivas para o modelo proposto por Watson e Crick.',fact:'Também investigou vírus e carvão mineral, deixando contribuições fundamentais na cristalografia que só foram plenamente reconhecidas após sua morte.'},{id:'johnson',name:'Katherine Johnson',years:'1918 – 2020',field:'Matemática Aeroespacial',emblem:'orbit',desc:'Matemática da NASA, calculou manualmente as trajetórias que levaram os primeiros astronautas americanos ao espaço, incluindo a órbita do voo de John Glenn e a missão Apollo 11.',fact:'John Glenn só confiou no voo depois que Katherine conferiu, à mão, os cálculos feitos por computador.'},{id:'wu',name:'Chien-Shiung Wu',years:'1912 – 1997',field:'Física Nuclear',emblem:'split',desc:'Conduziu o experimento que derrubou a "lei da paridade", um dos pilares até então intocáveis da física de partículas, mudando a forma como entendemos as forças fundamentais da natureza.',fact:'Apesar de sua descoberta ter rendido o Nobel de 1957 a colegas teóricos, o próprio comitê reconheceu décadas depois que Wu deveria ter sido incluída no prêmio.'},{id:'lamarr',name:'Hedy Lamarr',years:'1914 – 2000',field:'Invenção & Telecomunicações',emblem:'waves',desc:'Atriz de Hollywood e inventora, desenvolveu junto ao compositor George Antheil um sistema de "salto de frequência" para guiar torpedos sem interferência inimiga.',fact:'O princípio que ela patenteou em 1942 é hoje a base tecnológica do Wi-Fi, do Bluetooth e do GPS.'},{id:'tu',name:'Tu Youyou',years:'1930 –',field:'Farmacologia',emblem:'leaf',desc:'Ao revisitar textos da medicina tradicional chinesa, isolou a artemisinina de uma planta medicinal, criando o tratamento mais eficaz contra a malária das últimas décadas.',fact:'Recebeu o Prêmio Nobel de Fisiologia ou Medicina em 2015 sem nunca ter feito doutorado ou trabalhado no exterior — uma trajetória construída inteiramente na China.'},{id:'anning',name:'Mary Anning',years:'1799 – 1847',field:'Paleontologia',emblem:'fossil',desc:'Ainda adolescente, encontrou nos penhascos de Lyme Regis o primeiro esqueleto completo de Ictiossauro, seguido de outros fósseis que ajudaram a fundar a paleontologia moderna.',fact:'Por ser mulher, foi impedida de ingressar na Sociedade Geológica de Londres — sociedade que hoje concede uma medalha anual em sua homenagem.'}];
+const SCIENTISTS=[{id:'curie',name:'Marie Curie',years:'1867 – 1934',field:'Física & Química',emblem:'atom',desc:'Pioneira no estudo da radioatividade — termo que ela mesma cunhou — Marie Curie isolou os elementos polônio e rádio, abrindo caminho para a física nuclear e para a radioterapia moderna.',fact:'É a única pessoa da história a receber o Prêmio Nobel em duas ciências diferentes: Física (1903) e Química (1911).'},{id:'lovelace',name:'Ada Lovelace',years:'1815 – 1852',field:'Matemática & Computação',emblem:'code',desc:'Trabalhando com a Máquina Analítica de Charles Babbage, Ada escreveu notas e algoritmos que hoje são reconhecidos como o primeiro programa de computador da história.',fact:'Ela previu, ainda no século XIX, que máquinas poderiam un dia compor música — quase 200 anos antes da inteligência artificial generativa.'},{id:'franklin',name:'Rosalind Franklin',years:'1920 – 1958',field:'Química & Biofísica',emblem:'helix',desc:'Suas imagens de difração de raios X, especialmente a icônica "Fotografia 51", revelaram a estrutura helicoidal do DNA e foram decisivas para o modelo proposto por Watson e Crick.',fact:'Também investigou vírus e carvão mineral, deixando contribuições fundamentais na cristalografia que só foram plenamente reconhecidas após sua morte.'},{id:'johnson',name:'Katherine Johnson',years:'1918 – 2020',field:'Matemática Aeroespacial',emblem:'orbit',desc:'Matemática da NASA, calculou manualmente as trajetórias que levaram os primeiros astronautas americanos ao espaço, incluindo a órbita do voo de John Glenn e a missão Apollo 11.',fact:'John Glenn só confiou no voo depois que Katherine conferiu, à mão, os cálculos feitos por computador.'},{id:'wu',name:'Chien-Shiung Wu',years:'1912 – 1997',field:'Física Nuclear',emblem:'split',desc:'Conduziu o experimento que derrubou a "lei da paridade", um dos pilares até então intocáveis da física de partículas, mudando a forma como entendemos as forças fundamentais da natureza.',fact:'Apesar de sua descoberta ter rendido o Nobel de 1957 a colegas teóricos, o próprio comitê reconheceu décadas depois que Wu deveria ter sido incluída no prêmio.'},{id:'lamarr',name:'Hedy Lamarr',years:'1914 – 2000',field:'Invenção & Telecomunicações',emblem:'waves',desc:'Atriz de Hollywood e inventora, desenvolveu junto ao compositor George Antheil um sistema de "salto de frequência" para guiar torpedos sem interferência inimiga.',fact:'O princípio que ela patenteou em 1942 é hoje a base tecnológica do Wi-Fi, do Bluetooth e do GPS.'},{id:'tu',name:'Tu Youyou',years:'1930 –',field:'Farmacologia',emblem:'leaf',desc:'Ao revisitar textos da medicina tradicional chinesa, isolou a artemisinina de uma planta medicinal, criando o tratamento mais eficaz contra a malária das últimas décadas.',fact:'Recebeu o Prêmio Nobel de Fisiologia ou Medicina em 2015 sem nunca ter feito doutorado ou trabalhado no exterior — uma trajetória construída inteiramente na China.'},{id:'anning',name:'Mary Anning',years:'1799 – 1847',field:'Paleontologia',emblem:'fossil',desc:'Ainda adolescente, encontrou nos penhascos de Lyme Regis o primeiro esqueleto completo de Ictiossauro, seguido de outros fósseis que ajudaram a fundar a paleontologia moderna.',fact:'Por ser mulher, foi impedida de ingressar na Sociedade Geológica de Londres — sociedade que hoje concede uma medalha anual em sua homenagem.'}];
 const CREDITS=['Diego','Diogo','Eduardo','Rodrigo','Alexandre','Lucas','Karlos André Herculano de Moraes'];
 const container=document.getElementById('canvas-container');
 const scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x0a0f1e,0.028);
@@ -184,11 +187,14 @@ function flyToStar(star){creditsPanel.classList.remove('open');autoTourActive=fa
 let autoTourActive=false;let autoTourAngle=Math.atan2(player.position.x,player.position.z);const btnAuto=document.getElementById('btn-autorotate');btnAuto.addEventListener('click',()=>{autoTourActive=!autoTourActive;btnAuto.classList.toggle('active',autoTourActive);if(autoTourActive)autoTourAngle=Math.atan2(player.position.x,player.position.z);});
 function updateAutoTour(dt){if(!autoTourActive)return;autoTourAngle+=dt*0.18;const r=8.6;player.position.set(Math.sin(autoTourAngle)*r,EYE_HEIGHT,Math.cos(autoTourAngle)*r);player.yaw=autoTourAngle;player.pitch=THREE.MathUtils.lerp(player.pitch,-0.02,0.04);}
 
-// ========== SUPORTE WEBXR (META QUEST 3) ==========
+// ========== SUPORTE WEBXR (META QUEST 3 / CONTROLES E PINÇA) ==========
+
 const controller1 = renderer.xr.getController(0);
 const controller2 = renderer.xr.getController(1);
+
 controller1.addEventListener('select', onVRSelect);
 controller2.addEventListener('select', onVRSelect);
+
 scene.add(controller1);
 scene.add(controller2);
 
@@ -197,27 +203,33 @@ const lineGeo = new THREE.BufferGeometry().setFromPoints([
     new THREE.Vector3(0, 0, -5)
 ]);
 const lineMat = new THREE.LineBasicMaterial({ color: 0xc9a86a, transparent: true, opacity: 0.6 });
+
 const laser1 = new THREE.Line(lineGeo, lineMat);
 const laser2 = new THREE.Line(lineGeo, lineMat);
+
 controller1.add(laser1);
 controller2.add(laser2);
 
 const vrMatrix = new THREE.Matrix4();
+
 function onVRSelect(event) {
     const controller = event.target;
     vrMatrix.identity().extractRotation(controller.matrixWorld);
+
     raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(vrMatrix);
+
     const hits = raycaster.intersectObjects(interactiveObjects, false);
     if (hits.length > 0) {
         handleActivate(hits[0].object);
     }
 }
 
+// Botão "Entrar em VR" Imersivo
 const btnNativeVR = document.getElementById('btn-nativevr');
 btnNativeVR.addEventListener('click', async () => {
     if (!navigator.xr) {
-        alert('WebXR não é suportado neste navegador.');
+        alert('WebXR não é suportado neste navegador. Acesse diretamente pelo Meta Quest Browser.');
         return;
     }
     try {
@@ -225,52 +237,67 @@ btnNativeVR.addEventListener('click', async () => {
             optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'dom-overlay'],
             domOverlay: { root: document.body }
         });
+
         document.body.classList.add('xr-active');
         renderer.xr.setSession(session);
+
         session.addEventListener('end', () => {
             document.body.classList.remove('xr-active');
             renderer.xr.setSession(null);
             btnNativeVR.classList.remove('active');
             applyPlayerToCamera();
         });
+
         btnNativeVR.classList.add('active');
     } catch (err) {
         console.error('Falha ao iniciar WebXR:', err);
-        alert('Não foi possível iniciar a sessão VR. Verifique se o dispositivo é compatível.');
+        alert('Não foi possível iniciar a sessão VR. Verifique as permissões do dispositivo.');
     }
 });
 
-// ========== LOOP PRINCIPAL ==========
+// Loop de Animação Principal
 const clock = new THREE.Clock();
+
 function animate() {
     const dt = Math.min(clock.getDelta(), 0.1);
     const elapsed = clock.elapsedTime;
 
-    // Atualiza escalas suaves e brilho das estrelas de crédito
-    interactiveObjects.forEach(o => {
-        const t = o.userData._targetScale;
-        if (t !== undefined) {
-            const next = THREE.MathUtils.lerp(o.scale.x, t, 0.18);
-            o.scale.set(next, next, 1);
-        }
-    });
-    creditStars.forEach(s => {
-        const ph = s.userData.twinklePhase;
-        s.material.opacity = 0.85 + Math.sin(elapsed * 1.4 + ph) * 0.15;
-    });
+    animateSmoothScales();
+    twinkleCreditStars(elapsed);
     moonLight.position.x = Math.sin(elapsed * 0.05) * 2;
 
+    // Se estiver no Meta Quest 3 (Sessão WebXR Ativa)
     if (renderer.xr.isPresenting) {
         renderer.render(scene, camera);
         return;
     }
 
-    // Modo normal (desktop / móvel sem VR)
+    // Modo normal (desktop/móvel sem VR)
     updatePlayerMovement(dt);
     updateAutoTour(dt);
     applyPlayerToCamera();
     renderer.render(scene, camera);
 }
+
+function animateSmoothScales() {
+    interactiveObjects.forEach(o => {
+        const t = o.userData._targetScale;
+        if (t !== undefined) {
+            const cur = o.scale.x;
+            const next = THREE.MathUtils.lerp(cur, t, 0.18);
+            o.scale.set(next, next, 1);
+        }
+    });
+}
+
+function twinkleCreditStars(elapsed) {
+    creditStars.forEach(s => {
+        const ph = s.userData.twinklePhase;
+        const k = 0.85 + Math.sin(elapsed * 1.4 + ph) * 0.15;
+        s.material.opacity = k;
+    });
+}
+
 renderer.setAnimationLoop(animate);
 
 window.addEventListener('resize', () => {
@@ -280,6 +307,7 @@ window.addEventListener('resize', () => {
 });
 
 setTimeout(() => document.getElementById('loading').classList.add('hidden'), 900);
+
 })();
 </script>
 </body>
