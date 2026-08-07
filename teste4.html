@@ -87,6 +87,14 @@
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:rgba(201,168,106,.35);border-radius:4px;}
   @media(max-width:640px){#controls-cluster{max-width:100vw;}.pill-btn{padding:9px 12px;font-size:10px;}#modal .modal-top{padding:24px 22px 14px;}#modal .modal-body{padding:20px 22px 28px;font-size:1.05rem;}}
+  body.xr-active {
+  background: transparent !important;
+}
+body.xr-active #ui-overlay,
+body.xr-active #joystick-base,
+body.xr-active .hint-box {
+  display: none !important;
+}
 </style>
 </head>
 <body>
@@ -241,6 +249,7 @@ function onVRSelect(event) {
 }
 
 // 3. Iniciar Sessão WebXR Imersiva (com suporte a dom-overlay e hand-tracking)
+// 3. Botão "Entrar em VR" com tratamento de transparência (evita tela preta)
 const btnNativeVR = document.getElementById('btn-nativevr');
 btnNativeVR.addEventListener('click', async () => {
     if (!navigator.xr) {
@@ -252,9 +261,13 @@ btnNativeVR.addEventListener('click', async () => {
             optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'dom-overlay'],
             domOverlay: { root: document.body }
         });
+
+        // Adiciona classe para tornar o fundo do HTML transparente no Quest
+        document.body.classList.add('xr-active');
         renderer.xr.setSession(session);
 
         session.addEventListener('end', () => {
+            document.body.classList.remove('xr-active');
             if (stereoActive) stopStereo();
             renderer.xr.setSession(null);
             btnNativeVR.classList.remove('active');
@@ -264,7 +277,7 @@ btnNativeVR.addEventListener('click', async () => {
         btnNativeVR.classList.add('active');
     } catch (err) {
         console.error('Falha ao iniciar WebXR:', err);
-        alert('Não foi possível iniciar a sessão VR. Verifique se o dispositivo é compatível e tente novamente.');
+        alert('Não foi possível iniciar a sessão VR. Verifique se o dispositivo é compatível.');
     }
 });
 
