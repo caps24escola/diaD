@@ -110,6 +110,8 @@ body.xr-active .hint-box {
 <div id="modal-backdrop"><div id="modal"><button id="modal-close">✕</button><div class="modal-top"><div class="emblem-wrap"><svg id="modal-emblem" viewBox="0 0 40 40"></svg></div><div><div class="field" id="modal-field">Campo</div><h2 id="modal-name">Nome</h2><div class="years" id="modal-years">0000–0000</div></div></div><div class="modal-body"><p id="modal-desc"></p><div class="fact" id="modal-fact"></div></div></div></div>
 <div id="credit-tooltip"><span class="lbl">estrela dedicada a</span><span id="credit-tooltip-name">—</span></div>
 <div id="credits-panel"><div class="eyebrow">Homenagem</div><h2>Céu de Créditos</h2><div class="sub">Sete estrelas foram acesas sobre o museu em homenagem a quem tornou este projeto possível. Olhe para cima na sala, ou toque em um nome abaixo.</div><div id="credit-list"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/DeviceOrientationControls.js"></script>
 <script>
 (function(){
 "use strict";
@@ -143,7 +145,7 @@ const titleMat=new THREE.SpriteMaterial({map:titleTexture(),transparent:true});c
 const interactiveObjects=[];
 const pedestalGeo=new THREE.CylinderGeometry(0.55,0.7,1.1,24);const pedestalMat=new THREE.MeshStandardMaterial({color:0x1a2140,roughness:0.5,metalness:0.25});const plaqueGeo=new THREE.PlaneGeometry(1.2,1.5);
 const N=SCIENTISTS.length;const ringR=9.4;
-SCIENTISTS.forEach((sci,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2;const px=Math.cos(a)*ringR,pz=Math.sin(a)*ringR;const pedestal=new THREE.Mesh(pedestalGeo,pedestalMat);pedestal.position.set(px,0.55,pz);pedestal.castShadow=true;pedestal.receiveShadow=true;scene.add(pedestal);const plaqueMat=new THREE.MeshBasicMaterial({map:plaqueTexture(sci),transparent:true,side:THREE.DoubleSide});const plaque=new THREE.Mesh(plaqueGeo,plaqueMat);plaque.position.set(px*0.86,1.5,pz*0.86);plaque.lookAt(0,1.5,0);plaque.userData={type:'scientist',data:sci,baseScale:1};scene.add(plaque);interactiveObjects.push(plaque);const spot=new THREE.SpotLight(0xe8d5a8,1.1,9,0.5,0.5,1.4);spot.position.set(px*0.7,5.5,pz*0.7);spot.target=plaque;scene.add(spot);scene.add(spot.target);const glowGeo=new THREE.CircleGeometry(1.1,32);const glowMat=new THREE.MeshBasicMaterial({color:0xc9a86a,transparent:true,opacity:0.10});const glow=new THREE.Mesh(glowGeo,glowMat);glow.rotation.x=-Math.PI/2;glow.position.set(px,0.02,pz);scene.add(glow);});
+SCIENTISTS.forEach((sci,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2;const px=Math.cos(a)*ringR,pz=Math.sin(a)*ringR;const pedestal=new THREE.Mesh(pedestalGeo,pedestalMat);pedestal.position.set(px,0.55,pz);pedestal.castShadow=true;pedestal.receiveShadow=true;scene.add(pedestal);const plaqueMat=new THREE.MeshBasicMaterial({map:plaqueTexture(sci),transparent:true});const plaque=new THREE.Mesh(plaqueGeo,plaqueMat);plaque.position.set(px*0.86,1.5,pz*0.86);plaque.lookAt(0,1.5,0);plaque.userData={type:'scientist',data:sci,baseScale:1};scene.add(plaque);interactiveObjects.push(plaque);const spot=new THREE.SpotLight(0xe8d5a8,1.1,9,0.5,0.5,1.4);spot.position.set(px*0.7,5.5,pz*0.7);spot.target=plaque;scene.add(spot);scene.add(spot.target);const glowGeo=new THREE.CircleGeometry(1.1,32);const glowMat=new THREE.MeshBasicMaterial({color:0xc9a86a,transparent:true,opacity:0.10});const glow=new THREE.Mesh(glowGeo,glowMat);glow.rotation.x=-Math.PI/2;glow.position.set(px,0.02,pz);scene.add(glow);});
 
 const skyGroup=new THREE.Group();scene.add(skyGroup);
 const domeGeo=new THREE.SphereGeometry(90,32,24);const domeMat=new THREE.MeshBasicMaterial({color:0x060814,side:THREE.BackSide});skyGroup.add(new THREE.Mesh(domeGeo,domeMat));
@@ -204,18 +206,50 @@ function flyToStar(star){creditsPanel.classList.remove('open');autoTourActive=fa
 let autoTourActive=false;let autoTourAngle=Math.atan2(player.position.x,player.position.z);const btnAuto=document.getElementById('btn-autorotate');btnAuto.addEventListener('click',()=>{autoTourActive=!autoTourActive;btnAuto.classList.toggle('active',autoTourActive);if(autoTourActive)autoTourAngle=Math.atan2(player.position.x,player.position.z);});
 function updateAutoTour(dt){if(!autoTourActive)return;autoTourAngle+=dt*0.18;const r=8.6;player.position.set(Math.sin(autoTourAngle)*r,EYE_HEIGHT,Math.cos(autoTourAngle)*r);player.yaw=autoTourAngle;player.pitch=THREE.MathUtils.lerp(player.pitch,-0.02,0.04);}
 
-// ========== SUPORTE A WEBXR & META QUEST 3S (PINCH / GATILHO) ==========
+// ========== SUPORTE A WEBXR & META QUEST 3 (PINCH / GATILHO) ==========
 
 // 1. Configurar controladores para mãos/controles do Meta Quest
 const controller1 = renderer.xr.getController(0);
 const controller2 = renderer.xr.getController(1);
 
-// 'selectstart' responde imediatamente ao fechar a pinça
-controller1.addEventListener('selectstart', onVRSelect);
-controller2.addEventListener('selectstart', onVRSelect);
+// Função de seleção (gatilho/pinça) - CORRIGIDA
+function onVRSelect(event) {
+    const controller = event.target;
+
+    // Obtém posição e orientação de forma confiável
+    const pos = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    controller.getWorldPosition(pos);
+    controller.getWorldQuaternion(quat);
+
+    // Direção do raio: -Z no espaço local do controle
+    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(quat);
+
+    raycaster.ray.origin.copy(pos);
+    raycaster.ray.direction.copy(dir);
+
+    // Intersecta os objetos interativos (com recursive = true para pegar filhos)
+    const hits = raycaster.intersectObjects(interactiveObjects, true);
+    // console.log('Número de acertos:', hits.length); // descomente para depuração
+    if (hits.length > 0) {
+        // Encontra o objeto mais próximo que tem userData.type
+        for (let hit of hits) {
+            let obj = hit.object;
+            // Se o objeto estiver dentro de um grupo, percorre a hierarquia até achar o userData
+            while (obj) {
+                if (obj.userData && (obj.userData.type === 'scientist' || obj.userData.type === 'credit')) {
+                    handleActivate(obj);
+                    return;
+                }
+                obj = obj.parent;
+            }
+        }
+    }
+}
+
+// Adiciona os controladores à cena e registra os eventos
 controller1.addEventListener('select', onVRSelect);
 controller2.addEventListener('select', onVRSelect);
-
 scene.add(controller1);
 scene.add(controller2);
 
@@ -226,30 +260,10 @@ const lineGeo = new THREE.BufferGeometry().setFromPoints([
 ]);
 const lineMat = new THREE.LineBasicMaterial({ color: 0xc9a86a, transparent: true, opacity: 0.6 });
 
-const laser1 = new THREE.Line(lineGeo, lineMat);
-const laser2 = new THREE.Line(lineGeo, lineMat);
-
+const laser1 = new THREE.Line(lineGeo.clone(), lineMat);
+const laser2 = new THREE.Line(lineGeo.clone(), lineMat);
 controller1.add(laser1);
 controller2.add(laser2);
-
-// 2. Função disparada no gesto de pinça (pinch) ou ao apertar o gatilho
-const vrMatrix = new THREE.Matrix4();
-
-function onVRSelect(event) {
-    const controller = event.target;
-    // Força a atualização da matriz do controlador no instante exato do clique
-    controller.updateMatrixWorld(true);
-    vrMatrix.identity().extractRotation(controller.matrixWorld);
-
-    // Projetar raio de seleção da mão
-    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(vrMatrix);
-
-    const hits = raycaster.intersectObjects(interactiveObjects, false);
-    if (hits.length > 0) {
-        handleActivate(hits[0].object);
-    }
-}
 
 // 3. Iniciar Sessão WebXR Imersiva (com suporte a dom-overlay e hand-tracking)
 const btnNativeVR = document.getElementById('btn-nativevr');
@@ -282,7 +296,6 @@ btnNativeVR.addEventListener('click', async () => {
         alert('Não foi possível iniciar a sessão VR. Verifique se o dispositivo é compatível.');
     }
 });
-
 
 // Modo Stereo (Cardboard / Giroscópio)
 const stereoContainer = document.getElementById('stereo-container');
@@ -455,21 +468,6 @@ function animate() {
 
     // Se estiver no Meta Quest 3 (Sessão WebXR Ativa)
     if (renderer.xr.isPresenting) {
-        // Atualiza a matriz do controlador continuamente para manter a animação e interações sincronizadas
-        [controller1, controller2].forEach(ctrl => {
-            if (ctrl) {
-                ctrl.updateMatrixWorld(true);
-                vrMatrix.identity().extractRotation(ctrl.matrixWorld);
-                raycaster.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);
-                raycaster.ray.direction.set(0, 0, -1).applyMatrix4(vrMatrix);
-
-                const hits = raycaster.intersectObjects(interactiveObjects, false);
-                if (hits.length > 0) {
-                    setHover(hits[0].object);
-                }
-            }
-        });
-
         renderer.render(scene, camera);
         return;
     }
