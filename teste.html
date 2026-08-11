@@ -3,325 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Associação: Mulheres na Ciência</title>
+  <title>Mulheres na Ciência — Dia D da Tecnologia</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Short+Stack&display=swap" rel="stylesheet">
+
   <style>
+    /* Reset e base de caderno/papel */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-      color: #ffffff;
-      min-height: 100vh;
+      background-color: #faf6ee;
+      /* Padrao sutil de fundo estilo papel quadriculado/pontilhado */
+      background-image: radial-gradient(#d3cbb7 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      color: #2b2b2b;
+      font-family: 'Patrick Hand', cursive;
+      font-size: 1.2rem;
+      padding: 30px 15px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
+      transform: rotate(-1.5deg); /* Leve inclinação para quebrar alinhamento */
     }
 
+    /* Titulo principal com fonte marcante */
     h1 {
+      font-family: 'Caveat', cursive;
+      font-size: 3.5rem;
+      color: #1a1a1a;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    /* Efeito de marca-texto amarelo */
+    .highlight {
+      background: linear-gradient(100deg, rgba(255, 235, 59, 0) 1%, rgba(255, 235, 59, 0.8) 2.5%, rgba(255, 235, 59, 0.6) 98%);
+      padding: 0 8px;
+      border-radius: 8px 0px 12px 2px;
+    }
+
+    p.subtitle {
+      font-size: 1.4rem;
+      color: #555;
+    }
+
+    /* Container desalinhado */
+    .cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      max-width: 900px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Card estilo rabisco/esboço */
+    .sketch-card {
+      background: #ffffff;
+      border: 3px solid #2b2b2b;
+      /* Borda imperfeita (desenhada à mão) usando border-radius assimétrico */
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+      padding: 25px;
+      width: 260px;
+      box-shadow: 5px 6px 0px #2b2b2b; /* Sombra sólida estilo HQ */
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    /* Rotações individuais intencionais (ordem no caos) */
+    .sketch-card:nth-child(1) { transform: rotate(-2deg); }
+    .sketch-card:nth-child(2) { transform: rotate(1.5deg); margin-top: 15px; }
+    .sketch-card:nth-child(3) { transform: rotate(-1deg); }
+
+    .sketch-card:hover {
+      transform: scale(1.05) rotate(0deg) !important;
+      box-shadow: 8px 10px 0px #ff4081;
+      border-color: #ff4081;
+    }
+
+    .card-tag {
+      font-family: 'Short Stack', cursive;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      background: #e1f5fe;
+      border: 2px solid #2b2b2b;
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px 3px 15px 5px;
+      margin-bottom: 12px;
+    }
+
+    .sketch-card h2 {
+      font-family: 'Caveat', cursive;
       font-size: 2.2rem;
-      color: #00e5ff;
       margin-bottom: 8px;
     }
 
-    p {
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-
-    .stats {
-      margin-bottom: 20px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 25px;
-      border-radius: 20px;
-      backdrop-filter: blur(5px);
-    }
-
-    .game-container {
-      display: flex;
-      gap: 30px;
-      max-width: 900px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    @media (max-width: 768px) {
-      .game-container {
-        flex-direction: column;
-      }
-    }
-
-    .column {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .column h2 {
-      font-size: 1.3rem;
-      text-align: center;
-      color: #ff007f;
-      margin-bottom: 5px;
-    }
-
-    /* Cards de Nomes (Draggables) */
-    .draggable {
-      background: #2a2a40;
-      border: 2px solid #00e5ff;
-      color: #ffffff;
-      padding: 15px;
-      border-radius: 10px;
-      cursor: grab;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      transition: transform 0.2s, background 0.2s;
-      user-select: none;
-    }
-
-    .draggable:active {
-      cursor: grabbing;
-    }
-
-    .draggable.dragging {
-      opacity: 0.5;
-      transform: scale(0.95);
-    }
-
-    .draggable.matched {
-      background: #2ecc71;
-      border-color: #27ae60;
-      cursor: default;
-      opacity: 0.8;
-    }
-
-    /* Slots de Descobertas (Drop Targets) */
-    .drop-target {
-      background: rgba(255, 255, 255, 0.08);
-      border: 2px dashed rgba(255, 255, 255, 0.3);
-      padding: 15px;
-      border-radius: 10px;
-      min-height: 80px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 0.9rem;
+    .sketch-card p {
       line-height: 1.3;
-      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      color: #444;
     }
 
-    .drop-target.hovered {
-      background: rgba(0, 229, 255, 0.2);
-      border-color: #00e5ff;
+    /* Rabisco / Elemento decorativo desenhado */
+    .doodle-star {
+      position: absolute;
+      top: -15px;
+      right: -10px;
+      font-size: 1.8rem;
     }
 
-    .drop-target.correct {
-      background: rgba(46, 204, 113, 0.2);
-      border: 2px solid #2ecc71;
-    }
-
-    .win-message {
-      display: none;
-      margin-top: 20px;
-      font-size: 1.3rem;
-      color: #2ecc71;
+    /* Botão artesanal */
+    .btn-sketch {
+      margin-top: 40px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.8rem;
       font-weight: bold;
-      text-align: center;
-    }
-
-    button {
-      margin-top: 20px;
-      background-color: #ff007f;
-      color: #ffffff;
-      border: none;
-      padding: 12px 28px;
-      font-size: 1rem;
-      font-weight: bold;
-      border-radius: 25px;
+      background: #ff80ab;
+      color: #1a1a1a;
+      padding: 10px 30px;
+      border: 3px solid #2b2b2b;
+      border-radius: 20px 255px 15px 225px/225px 15px 255px 15px;
+      box-shadow: 4px 4px 0px #2b2b2b;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
+      transition: transform 0.1s, box-shadow 0.1s;
     }
 
-    button:hover {
-      background-color: #e0006c;
-      transform: scale(1.05);
+    .btn-sketch:hover {
+      background: #ff4081;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 6px 6px 0px #2b2b2b;
+    }
+
+    .btn-sketch:active {
+      transform: translateY(2px);
+      box-shadow: 2px 2px 0px #2b2b2b;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🧬 Ligue os Pontos: Mulheres na Ciência</h1>
-    <p>Arraste o nome da cientista até a sua respectiva conquista!</p>
+    <h1>👩‍🔬 <span class="highlight">Mulheres na Ciência</span> ✏️</h1>
+    <p class="subtitle">Dia D da Tecnologia — Projeto Interativo & Artesanal</p>
   </header>
 
-  <div class="stats">
-    Acertos: <span id="score">0</span> / 5
-  </div>
+  <main class="cards-grid">
+    
+    <div class="sketch-card">
+      <span class="doodle-star">✨</span>
+      <span class="card-tag">Jogo #01</span>
+      <h2>Jogo da Memória</h2>
+      <p>Virar as cartas, encontrar os pares de cientistas e ler resumos sobre suas grandes descobertas!</p>
+    </div>
 
-  <div class="game-container">
-    <div class="column" id="namesColumn">
-      <h2>Cientistas</h2>
-      </div>
+    <div class="sketch-card">
+      <span class="doodle-star">⚛️</span>
+      <span class="card-tag" style="background: #e8f5e9;">Jogo #02</span>
+      <h2>Velha Científica</h2>
+      <p>Um duelo entre Marie Curie e Ada Lovelace para ver quem domina o tabuleiro primeiro!</p>
+    </div>
 
-    <div class="column" id="targetsColumn">
-      <h2>Descobertas e Feitos</h2>
-      </div>
-  </div>
+    <div class="sketch-card">
+      <span class="doodle-star">📡</span>
+      <span class="card-tag" style="background: #f3e5f5;">Jogo #03</span>
+      <h2>Batalha Naval</h2>
+      <p>Localize os laboratórios secretos no radar e revele as conquistas de grandes mulheres.</p>
+    </div>
 
-  <div class="win-message" id="winMessage">
-    🎉 Fantástico! Você associou todas as cientistas corretamente!
-  </div>
+  </main>
 
-  <button onclick="initGame()">Reiniciar Jogo</button>
+  <button class="btn-sketch" onclick="alert('Iniciando o evento!')">Explorar os Jogos!</button>
 
-  <script>
-    const data = [
-      {
-        id: "marie-curie",
-        name: "Marie Curie",
-        desc: "Pioneira nos estudos da radioatividade e única pessoa a ganhar o Nobel em duas áreas científicas diferentes."
-      },
-      {
-        id: "ada-lovelace",
-        name: "Ada Lovelace",
-        desc: "Escreveu o primeiro algoritmo da história a ser processado por uma máquina (mãe da programação)."
-      },
-      {
-        id: "rosalind-franklin",
-        name: "Rosalind Franklin",
-        desc: "Capturou a 'Fotografia 51', imagem fundamental para revelar a estrutura em dupla hélice do DNA."
-      },
-      {
-        id: "katherine-johnson",
-        name: "Katherine Johnson",
-        desc: "Matemática cujos cálculos manuais de trajetória de voo foram cruciais para o sucesso das missões Apollo da NASA."
-      },
-      {
-        id: "jaqueline-goes",
-        name: "Jaqueline Goes",
-        desc: "Biomédica brasileira que liderou o sequenciamento do genoma do vírus da COVID-19 em apenas 48 horas."
-      }
-    ];
-
-    let score = 0;
-
-    function initGame() {
-      score = 0;
-      document.getElementById('score').textContent = score;
-      document.getElementById('winMessage').style.display = 'none';
-
-      const namesColumn = document.getElementById('namesColumn');
-      const targetsColumn = document.getElementById('targetsColumn');
-
-      // Limpa colunas mantendo o título
-      namesColumn.innerHTML = '<h2>Cientistas</h2>';
-      targetsColumn.innerHTML = '<h2>Descobertas e Feitos</h2>';
-
-      // Embaralha separadamente nomes e descrições
-      const shuffledNames = [...data].sort(() => Math.random() - 0.5);
-      const shuffledTargets = [...data].sort(() => Math.random() - 0.5);
-
-      // Cria elementos arrastáveis (Nomes)
-      shuffledNames.forEach(item => {
-        const nameEl = document.createElement('div');
-        nameEl.classList.add('draggable');
-        nameEl.setAttribute('draggable', 'true');
-        nameEl.setAttribute('id', `drag-${item.id}`);
-        nameEl.dataset.id = item.id;
-        nameEl.textContent = item.name;
-
-        nameEl.addEventListener('dragstart', handleDragStart);
-        nameEl.addEventListener('dragend', handleDragEnd);
-
-        namesColumn.appendChild(nameEl);
-      });
-
-      // Cria alvos de soltura (Descobertas)
-      shuffledTargets.forEach(item => {
-        const targetEl = document.createElement('div');
-        targetEl.classList.add('drop-target');
-        targetEl.dataset.id = item.id;
-        targetEl.textContent = item.desc;
-
-        targetEl.addEventListener('dragover', handleDragOver);
-        targetEl.addEventListener('dragleave', handleDragLeave);
-        targetEl.addEventListener('drop', handleDrop);
-
-        targetsColumn.appendChild(targetEl);
-      });
-    }
-
-    let draggedItem = null;
-
-    function handleDragStart(e) {
-      draggedItem = this;
-      this.classList.add('dragging');
-      e.dataTransfer.setData('text/plain', this.dataset.id);
-    }
-
-    function handleDragEnd() {
-      this.classList.remove('dragging');
-      draggedItem = null;
-    }
-
-    function handleDragOver(e) {
-      e.preventDefault();
-      if (!this.classList.contains('correct')) {
-        this.classList.add('hovered');
-      }
-    }
-
-    function handleDragLeave() {
-      this.classList.remove('hovered');
-    }
-
-    function handleDrop(e) {
-      e.preventDefault();
-      this.classList.remove('hovered');
-
-      // Evita soltar num alvo já concluído
-      if (this.classList.contains('correct')) return;
-
-      const draggedId = e.dataTransfer.getData('text/plain');
-      const targetId = this.dataset.id;
-
-      if (draggedId === targetId) {
-        // Associação correta
-        this.classList.add('correct');
-        const matchedNameEl = document.getElementById(`drag-${draggedId}`);
-        matchedNameEl.classList.add('matched');
-        matchedNameEl.setAttribute('draggable', 'false');
-
-        // Move o elemento nome para dentro do card alvo
-        this.innerHTML = `<strong>${matchedNameEl.textContent}</strong><br><small>${this.textContent}</small>`;
-        matchedNameEl.style.display = 'none';
-
-        score++;
-        document.getElementById('score').textContent = score;
-
-        if (score === data.length) {
-          document.getElementById('winMessage').style.display = 'block';
-        }
-      }
-    }
-
-    initGame();
-  </script>
 </body>
 </html>
