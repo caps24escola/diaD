@@ -4,37 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mulheres na Ciência · Museu Construtivista</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
-    <style>
-        /* ── RESET & BASE ── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
+    <!-- Bootstrap 5 + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <style>
+        /* ── IDENTIDADE CONSTRUTIVISTA (CSS MÍNIMO) ── */
         :root {
             --red: #e01e37;
-            --black: #0b0b0b;
             --yellow: #f4c430;
+            --black: #0b0b0b;
             --white: #f0f0f0;
             --gray: #8a8a8a;
-            --dark-gray: #1c1c1c;
-            --bg: #0b0b0b;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
+            background-color: var(--black);
             color: var(--white);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
-            position: relative;
         }
 
-        /* ── CANVAS GEOMÉTRICO (FORMS EM MOVIMENTO) ── */
+        /* Canvas geométrico de fundo */
         #geo-canvas {
             position: fixed;
             top: 0;
@@ -46,702 +38,348 @@
             opacity: 0.35;
         }
 
-        /* ── OVERLAY PARA LEGIBILIDADE ── */
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 30% 40%, rgba(11, 11, 11, 0.3) 0%, rgba(11, 11, 11, 0.85) 100%);
+            background: radial-gradient(circle at 30% 40%, rgba(11, 11, 11, 0.2) 0%, rgba(11, 11, 11, 0.85) 100%);
             z-index: 1;
             pointer-events: none;
         }
 
-        /* ── CONTAINER PRINCIPAL ── */
         .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 28px;
             position: relative;
             z-index: 2;
         }
 
-        /* ── HEADER ── */
-        header {
-            padding: 32px 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid var(--red);
-            position: relative;
+        /* Recortes angulares (clip-path) */
+        .clip-angle {
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+        }
+        .clip-angle-left {
+            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%);
+        }
+        .clip-angle-right {
+            clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);
+        }
+        .clip-triangle {
+            clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%);
         }
 
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            width: 40%;
-            height: 3px;
-            background: var(--yellow);
+        /* Cores e bordas */
+        .bg-red {
+            background-color: var(--red) !important;
         }
-
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+        .bg-yellow {
+            background-color: var(--yellow) !important;
         }
-
-        .logo-tag {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 0.9rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--yellow);
+        .text-yellow {
+            color: var(--yellow) !important;
         }
-
-        .logo-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.8rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--white);
-            line-height: 1;
+        .border-red {
+            border-color: var(--red) !important;
+        }
+        .border-yellow {
+            border-color: var(--yellow) !important;
         }
 
         .badge-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 20px;
-            background: var(--red);
+            background-color: var(--red);
             color: var(--white);
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            padding: 0.5rem 1.5rem;
             clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
         }
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: var(--yellow);
-            border-radius: 50%;
-            animation: pulse-dot 1.4s infinite alternate;
-        }
-
-        @keyframes pulse-dot {
-            0% {
-                opacity: 0.3;
-                transform: scale(0.9);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-        }
-
-        /* ── HERO ── */
-        .hero {
-            padding: 70px 0 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            position: relative;
-        }
-
-        /* Bloco geométrico decorativo */
-        .hero::before {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 10%;
-            width: 320px;
-            height: 320px;
-            background: var(--red);
-            clip-path: polygon(25% 0%, 100% 25%, 75% 100%, 0% 75%);
-            opacity: 0.12;
-            z-index: -1;
-        }
-
-        .hero-subtitle {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.2rem;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: var(--yellow);
-            margin-bottom: 12px;
-            background: var(--black);
-            padding: 4px 16px 4px 12px;
-            display: inline-block;
-            clip-path: polygon(0% 0%, 100% 0%, 95% 100%, 0% 100%);
-            border-left: 6px solid var(--red);
-        }
-
-        .hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(3.6rem, 10vw, 7rem);
-            text-transform: uppercase;
-            line-height: 0.92;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            color: var(--white);
-            text-shadow: 6px 6px 0 var(--red), 10px 10px 0 rgba(0, 0, 0, 0.6);
-            max-width: 900px;
-        }
-
-        .hero-title .highlight {
-            color: var(--yellow);
-            text-shadow: 6px 6px 0 var(--red), 10px 10px 0 rgba(0, 0, 0, 0.6);
-        }
-
-        .hero-description {
-            max-width: 600px;
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: var(--gray);
-            font-weight: 400;
-            margin-bottom: 40px;
-            border-left: 4px solid var(--yellow);
-            padding-left: 22px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 16px 24px;
-            clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 0% 100%);
-        }
-
-        .cta-container {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 24px 32px;
-            margin-bottom: 40px;
-        }
-
         .btn-enter {
-            display: inline-flex;
-            align-items: center;
-            gap: 14px;
-            padding: 18px 44px;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.5rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
+            background-color: var(--yellow);
             color: var(--black);
-            background: var(--yellow);
-            border: none;
+            font-weight: 700;
+            padding: 0.8rem 2.5rem;
             clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
-            cursor: pointer;
             transition: all 0.25s ease;
-            text-decoration: none;
+            border: none;
             box-shadow: 8px 8px 0 var(--red);
         }
-
         .btn-enter:hover {
             transform: translate(-4px, -4px);
             box-shadow: 12px 12px 0 var(--red);
-            background: var(--white);
+            background-color: var(--white);
+            color: var(--black);
         }
 
-        .btn-enter svg {
-            width: 24px;
-            height: 24px;
-            transition: transform 0.3s ease;
-        }
-
-        .btn-enter:hover svg {
-            transform: translateX(6px);
-        }
-
-        .controls-hint {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--gray);
-            background: rgba(255, 255, 255, 0.04);
-            padding: 10px 24px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            clip-path: polygon(0% 0%, 100% 0%, 98% 100%, 2% 100%);
-        }
-
-        .controls-hint .key-badge {
-            display: inline-block;
-            padding: 2px 12px;
-            background: var(--dark-gray);
-            color: var(--yellow);
-            font-family: 'Inter', monospace;
-            font-weight: 700;
-            font-size: 0.75rem;
-            border: 1px solid rgba(244, 196, 48, 0.25);
-            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
-        }
-
-        /* ── FEATURES ── */
-        .features-section {
-            padding: 30px 0 60px;
-            position: relative;
-        }
-
-        .features-section::before {
-            content: '';
-            position: absolute;
-            left: -10%;
-            top: 20%;
-            width: 200px;
-            height: 200px;
-            background: var(--yellow);
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            opacity: 0.06;
-            z-index: -1;
-        }
-
-        .section-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.8rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--white);
-            margin-bottom: 40px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .section-title::after {
-            content: '';
-            flex: 1;
-            height: 4px;
-            background: var(--red);
-            clip-path: polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 28px;
-        }
-
-        .feature-card {
-            background: var(--black);
+        .card-feature {
+            background-color: var(--black);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 32px 24px 28px;
             clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--red);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.4s ease;
-        }
-
-        .feature-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .feature-card:hover {
+        .card-feature:hover {
             border-color: var(--yellow);
             transform: translateY(-6px);
             box-shadow: 12px 12px 0 rgba(224, 30, 55, 0.25);
         }
-
-        .feature-icon {
+        .card-feature .icon-box {
             width: 56px;
             height: 56px;
-            background: var(--red);
+            background-color: var(--red);
+            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 22px;
-            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+            font-size: 1.8rem;
             color: var(--white);
         }
 
-        .feature-icon svg {
-            width: 28px;
-            height: 28px;
+        .credit-card {
+            background-color: #1c1c1c;
+            border-left: 4px solid var(--red);
+            clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
+            transition: all 0.2s ease;
+        }
+        .credit-card:hover {
+            border-left-color: var(--yellow);
+            background-color: var(--black);
+        }
+        .credit-card .avatar {
+            width: 44px;
+            height: 44px;
+            background-color: var(--red);
+            clip-path: polygon(0% 0%, 100% 0%, 75% 100%, 0% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .credit-card.featured {
+            border-left-color: var(--yellow);
+            background-color: rgba(224, 30, 55, 0.08);
+        }
+        .credit-card.featured .avatar {
+            background-color: var(--yellow);
+            color: var(--black);
         }
 
-        .feature-card h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--white);
-            margin-bottom: 8px;
-        }
-
-        .feature-card p {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--gray);
-        }
-
-        /* ── CREDITS ── */
-        .credits-section {
-            padding: 40px 0 70px;
+        .section-divider {
             border-top: 3px solid var(--red);
             position: relative;
         }
-
-        .credits-section::after {
+        .section-divider::after {
             content: '';
             position: absolute;
-            top: -6px;
+            top: -3px;
             left: 30%;
             width: 25%;
             height: 3px;
             background: var(--yellow);
         }
 
-        .credits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 18px;
-            margin-top: 30px;
-        }
-
-        .credit-card {
-            background: var(--dark-gray);
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
-            border-left: 4px solid var(--red);
-            transition: all 0.25s ease;
-        }
-
-        .credit-card:hover {
-            border-left-color: var(--yellow);
-            background: var(--black);
-            transform: scale(1.02);
-        }
-
-        .credit-avatar {
-            width: 44px;
-            height: 44px;
-            background: var(--red);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.2rem;
-            color: var(--white);
-            clip-path: polygon(0% 0%, 100% 0%, 75% 100%, 0% 100%);
-            flex-shrink: 0;
-        }
-
-        .credit-info h4 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: var(--white);
-        }
-
-        .credit-info p {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--gray);
-        }
-
-        .featured-credit {
-            grid-column: 1 / -1;
-            max-width: 480px;
-            margin: 0 auto;
-            width: 100%;
-            border-left-color: var(--yellow);
-            background: rgba(224, 30, 55, 0.08);
-        }
-
-        .featured-credit .credit-avatar {
-            background: var(--yellow);
-            color: var(--black);
-        }
-
-        /* ── FOOTER ── */
-        footer {
-            padding: 28px 0 36px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--gray);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        footer p {
-            margin-bottom: 4px;
-        }
-
-        footer .small {
-            font-size: 0.65rem;
+        .footer-small {
             color: #555;
+            font-size: 0.7rem;
         }
 
-        /* ── RESPONSIVE ── */
+        /* Ajustes responsivos pontuais */
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                padding-bottom: 16px;
-            }
-
-            .badge-status {
-                align-self: flex-start;
-                font-size: 0.8rem;
-                padding: 6px 16px;
-            }
-
-            .hero {
-                padding: 40px 0 30px;
-                align-items: flex-start;
-            }
-
-            .hero-title {
-                font-size: clamp(2.8rem, 12vw, 4.2rem);
-                text-shadow: 4px 4px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.6);
-            }
-
-            .hero-title .highlight {
-                text-shadow: 4px 4px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.6);
-            }
-
-            .hero-description {
-                font-size: 0.95rem;
-                padding: 12px 18px;
-            }
-
             .btn-enter {
-                padding: 14px 28px;
-                font-size: 1.2rem;
                 width: 100%;
                 justify-content: center;
             }
-
-            .cta-container {
-                width: 100%;
-            }
-
-            .controls-hint {
-                width: 100%;
-                justify-content: center;
-                font-size: 0.7rem;
-                padding: 8px 16px;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .feature-card {
-                padding: 24px 18px;
-            }
-
-            .feature-card h3 {
-                font-size: 1.3rem;
-            }
-
-            .credits-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .featured-credit {
-                grid-column: 1 / -1;
-                max-width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .credits-grid {
-                grid-template-columns: 1fr;
-            }
-
             .hero-title {
-                font-size: 2.6rem;
+                font-size: 3rem !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas com formas geométricas animadas -->
+    <!-- Canvas geométrico animado -->
     <canvas id="geo-canvas"></canvas>
-
-    <!-- Overlay escuro para contraste -->
     <div class="overlay"></div>
 
     <div class="container">
 
         <!-- HEADER -->
-        <header>
-            <div class="logo-container">
-                <span class="logo-tag">Dia D · Tecnologia</span>
-                <span class="logo-title">Museu Construtivista</span>
+        <header class="d-flex flex-wrap justify-content-between align-items-center py-3 border-bottom border-red position-relative">
+            <div>
+                <p class="text-yellow text-uppercase fw-bold mb-0" style="font-size:0.8rem; letter-spacing:4px;">
+                    Dia D · Tecnologia
+                </p>
+                <h1 class="display-6 fw-bold text-white mb-0" style="font-family:'Bebas Neue',sans-serif; letter-spacing:2px;">
+                    Museu Construtivista
+                </h1>
             </div>
-            <div class="badge-status">
-                <span class="status-dot"></span>
+            <div class="badge-status d-flex align-items-center gap-2">
+                <span class="d-inline-block rounded-circle bg-yellow" style="width:10px;height:10px; animation:pulse-dot 1.4s infinite alternate;"></span>
                 Exposição 3D · Vanguarda
             </div>
         </header>
 
         <!-- HERO -->
-        <main class="hero">
-            <p class="hero-subtitle">Dia D da Tecnologia</p>
-            <h1 class="hero-title">
-                Mulheres <br /><span class="highlight">na Ciência</span>
-            </h1>
-            <p class="hero-description">
-                Geometria, contraste e velocidade — uma experiência imersiva dedicada às
-                pioneiras que redefiniram a física, a matemática e a tecnologia.
-                Navegue por um museu virtual com estética construtivista.
-            </p>
+        <section class="py-5 position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <p class="text-yellow text-uppercase fw-bold mb-2" style="letter-spacing:6px; font-size:0.9rem;">
+                        Dia D da Tecnologia
+                    </p>
+                    <h1 class="display-1 fw-bold text-white lh-1" style="font-family:'Bebas Neue',sans-serif; text-shadow:6px 6px 0 var(--red), 10px 10px 0 rgba(0,0,0,0.6);">
+                        Mulheres <br /><span class="text-yellow" style="text-shadow:6px 6px 0 var(--red), 10px 10px 0 rgba(0,0,0,0.6);">na Ciência</span>
+                    </h1>
+                    <p class="lead text-secondary mt-3 border-start border-4 border-yellow ps-4 py-2 bg-black bg-opacity-50 clip-angle" style="max-width:600px; font-weight:400;">
+                        Geometria, contraste e velocidade — uma experiência imersiva dedicada às
+                        pioneiras que redefiniram a física, a matemática e a tecnologia.
+                        Navegue por um museu virtual com estética construtivista.
+                    </p>
 
-            <div class="cta-container">
-                <a href="museu.html" class="btn-enter" id="enter-museum-btn">
-                    <span>Entrar no Museu</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                </a>
-
-                <div class="controls-hint">
-                    <span><span class="key-badge">WASD</span> andar</span>
-                    <span><span class="key-badge">Mouse</span> olhar</span>
-                    <span><span class="key-badge">Clique</span> vitrines</span>
-                    <span><span class="key-badge">VR</span> suportado</span>
+                    <div class="d-flex flex-wrap gap-3 align-items-center mt-4">
+                        <a href="museu.html" class="btn btn-enter d-inline-flex align-items-center gap-2">
+                            <span>Entrar no Museu</span>
+                            <i class="bi bi-arrow-right-circle fs-4"></i>
+                        </a>
+                        <div class="d-flex flex-wrap gap-3 text-secondary small text-uppercase bg-black bg-opacity-25 px-3 py-2 clip-angle">
+                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">WASD</span> andar</span>
+                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">Mouse</span> olhar</span>
+                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">Clique</span> vitrines</span>
+                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">VR</span> suportado</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </main>
+        </section>
 
         <!-- FEATURES -->
-        <section class="features-section">
-            <h2 class="section-title">A experiência</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3>Ambiente 3D</h3>
-                    <p>Pavilhão arquitetônico modelado com iluminação dinâmica e atmosfera futurista, inspirado no construtivismo russo.</p>
-                </div>
+        <section class="py-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">A experiência</h2>
+                <hr class="flex-grow-1 border-red border-3" style="clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);" />
+            </div>
 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col">
+                    <div class="card-feature h-100 p-4">
+                        <div class="icon-box mb-3">
+                            <i class="bi bi-grid-3x3-gap-fill fs-2"></i>
+                        </div>
+                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Ambiente 3D</h3>
+                        <p class="text-secondary">Pavilhão arquitetônico modelado com iluminação dinâmica e atmosfera futurista, inspirado no construtivismo russo.</p>
                     </div>
-                    <h3>Pioneiras</h3>
-                    <p>Ada Lovelace, Marie Curie, Hedy Lamarr e tantas outras que transformaram a ciência com suas descobertas e visão.</p>
                 </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                <div class="col">
+                    <div class="card-feature h-100 p-4">
+                        <div class="icon-box mb-3">
+                            <i class="bi bi-person-arms-up fs-2"></i>
+                        </div>
+                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Pioneiras</h3>
+                        <p class="text-secondary">Ada Lovelace, Marie Curie, Hedy Lamarr e tantas outras que transformaram a ciência com suas descobertas.</p>
                     </div>
-                    <h3>Modos de Visita</h3>
-                    <p>Passeio guiado automático, céu estrelado interativo e compatibilidade com óculos de Realidade Virtual (VR).</p>
+                </div>
+                <div class="col">
+                    <div class="card-feature h-100 p-4">
+                        <div class="icon-box mb-3">
+                            <i class="bi bi-vr fs-2"></i>
+                        </div>
+                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Modos de Visita</h3>
+                        <p class="text-secondary">Passeio guiado automático, céu estrelado interativo e compatibilidade com óculos de Realidade Virtual (VR).</p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- CREDITS -->
-        <section class="credits-section">
-            <h2 class="section-title">Equipe &amp; Créditos</h2>
-            <div class="credits-grid">
-                <div class="credit-card">
-                    <div class="credit-avatar">D</div>
-                    <div class="credit-info">
-                        <h4>Diego</h4>
-                        <p>Desenvolvimento WEB</p>
+        <section class="py-4 mt-3 section-divider">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">Equipe &amp; Créditos</h2>
+                <hr class="flex-grow-1 border-red border-3" style="clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);" />
+            </div>
+
+            <div class="row row-cols-2 row-cols-md-3 g-3">
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">D</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Diego</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento WEB</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card">
-                    <div class="credit-avatar">D</div>
-                    <div class="credit-info">
-                        <h4>Diogo</h4>
-                        <p>Mascote</p>
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">D</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Diogo</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Mascote</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card">
-                    <div class="credit-avatar">E</div>
-                    <div class="credit-info">
-                        <h4>Eduardo</h4>
-                        <p>Desenvolvimento Jogo</p>
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">E</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Eduardo</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento Jogo</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card">
-                    <div class="credit-avatar">R</div>
-                    <div class="credit-info">
-                        <h4>Rodrigo</h4>
-                        <p>Desenvolvimento Jogo</p>
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">R</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Rodrigo</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento Jogo</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card">
-                    <div class="credit-avatar">A</div>
-                    <div class="credit-info">
-                        <h4>Alexandre</h4>
-                        <p>Jogador de Vôlei</p>
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">A</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Alexandre</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Jogador de Vôlei</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card">
-                    <div class="credit-avatar">L</div>
-                    <div class="credit-info">
-                        <h4>Lucas</h4>
-                        <p>Tucano</p>
+                <div class="col">
+                    <div class="credit-card d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">L</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Lucas</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Tucano</p>
+                        </div>
                     </div>
                 </div>
-                <div class="credit-card featured-credit">
-                    <div class="credit-avatar">K</div>
-                    <div class="credit-info">
-                        <h4>Karlos André H. de Moraes</h4>
-                        <p>Repositor do BH</p>
+                <div class="col-12 col-md-6 mx-auto">
+                    <div class="credit-card featured d-flex align-items-center gap-3 p-3">
+                        <div class="avatar">K</div>
+                        <div>
+                            <h4 class="h6 fw-bold text-white m-0">Karlos André H. de Moraes</h4>
+                            <p class="small text-secondary m-0 text-uppercase">Repositor do BH</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- FOOTER -->
-        <footer>
-            <p>&copy; Dia D da Tecnologia — Museu Virtual "Mulheres na Ciência"</p>
-            <p class="small">Projeto Acadêmico &amp; Interativo em Web 3D · Estética Construtivista</p>
+        <footer class="py-4 text-center text-secondary border-top border-secondary border-opacity-10">
+            <p class="m-0 small text-uppercase">&copy; Dia D da Tecnologia — Museu Virtual "Mulheres na Ciência"</p>
+            <p class="footer-small m-0">Projeto Acadêmico &amp; Interativo em Web 3D · Estética Construtivista</p>
         </footer>
 
     </div>
 
-    <!-- Script do Canvas Geométrico -->
+    <!-- Bootstrap JS (opcional, para toggles etc.) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- Canvas geométrico animado -->
     <script>
         (function() {
             const canvas = document.getElementById('geo-canvas');
             const ctx = canvas.getContext('2d');
-
             let w, h;
             const shapes = [];
-
-            // Cores fortes do construtivismo
             const colors = ['#e01e37', '#f4c430', '#ffffff', '#0b0b0b'];
 
             function resize() {
@@ -749,37 +387,25 @@
                 h = canvas.height = window.innerHeight;
             }
 
-            function random(min, max) {
-                return Math.random() * (max - min) + min;
-            }
+            function random(min, max) { return Math.random() * (max - min) + min; }
 
             function initShapes(count = 28) {
                 shapes.length = 0;
                 for (let i = 0; i < count; i++) {
-                    const type = Math.floor(Math.random() * 3); // 0: rect, 1: triangle, 2: diagonal line
+                    const type = Math.floor(Math.random() * 3);
                     const color = colors[Math.floor(Math.random() * colors.length)];
-                    const x = random(0, w);
-                    const y = random(0, h);
-                    const size = random(20, 120);
-                    const angle = random(0, Math.PI * 2);
-                    const speedRot = random(-0.02, 0.02);
-                    const speedX = random(-0.3, 0.3);
-                    const speedY = random(-0.3, 0.3);
-                    const alpha = random(0.15, 0.6);
-
                     shapes.push({
                         type,
-                        x,
-                        y,
-                        size,
-                        angle,
-                        speedRot,
-                        speedX,
-                        speedY,
-                        color,
-                        alpha,
-                        // para triângulo e linha
+                        x: random(0, w),
+                        y: random(0, h),
+                        size: random(20, 120),
                         size2: random(20, 80),
+                        angle: random(0, Math.PI * 2),
+                        speedRot: random(-0.02, 0.02),
+                        speedX: random(-0.3, 0.3),
+                        speedY: random(-0.3, 0.3),
+                        color,
+                        alpha: random(0.15, 0.6),
                     });
                 }
             }
@@ -789,14 +415,12 @@
                 ctx.translate(s.x, s.y);
                 ctx.rotate(s.angle);
                 ctx.globalAlpha = s.alpha;
-
                 ctx.fillStyle = s.color;
                 ctx.strokeStyle = s.color;
 
                 if (s.type === 0) {
-                    // Retângulo com corte diagonal (estilo construtivista)
-                    const w2 = s.size;
-                    const h2 = s.size * 0.7;
+                    const w2 = s.size,
+                        h2 = s.size * 0.7;
                     ctx.beginPath();
                     ctx.moveTo(0, 0);
                     ctx.lineTo(w2, 0);
@@ -804,11 +428,10 @@
                     ctx.lineTo(0, h2);
                     ctx.closePath();
                     ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                     ctx.lineWidth = 2;
                     ctx.stroke();
                 } else if (s.type === 1) {
-                    // Triângulo
                     const s2 = s.size;
                     ctx.beginPath();
                     ctx.moveTo(0, -s2 / 2);
@@ -820,7 +443,6 @@
                     ctx.lineWidth = 2;
                     ctx.stroke();
                 } else {
-                    // Linha diagonal grossa
                     const len = s.size;
                     ctx.beginPath();
                     ctx.moveTo(-len / 2, -len / 4);
@@ -830,7 +452,6 @@
                     ctx.globalAlpha = s.alpha * 0.9;
                     ctx.stroke();
                 }
-
                 ctx.restore();
             }
 
@@ -839,12 +460,8 @@
                     s.x += s.speedX;
                     s.y += s.speedY;
                     s.angle += s.speedRot;
-
-                    // Bounce
                     if (s.x < -100 || s.x > w + 100) s.speedX *= -1;
                     if (s.y < -100 || s.y > h + 100) s.speedY *= -1;
-
-                    // Leve mudança de cor/alpha
                     s.alpha += random(-0.005, 0.005);
                     s.alpha = Math.min(0.7, Math.max(0.1, s.alpha));
                 }
@@ -852,25 +469,31 @@
 
             function draw() {
                 ctx.clearRect(0, 0, w, h);
-
-                // Desenha todas as formas
-                for (const s of shapes) {
-                    drawShape(s);
-                }
-
+                for (const s of shapes) drawShape(s);
                 updateShapes();
                 requestAnimationFrame(draw);
             }
 
-            window.addEventListener('resize', () => {
-                resize();
-                initShapes(32);
-            });
-
+            window.addEventListener('resize', () => { resize();
+                initShapes(32); });
             resize();
             initShapes(32);
             draw();
         })();
     </script>
+
+    <style>
+        /* Animações extras (pulse) */
+        @keyframes pulse-dot {
+            0% {
+                opacity: 0.3;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+    </style>
 </body>
 </html>
