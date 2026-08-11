@@ -1,1 +1,328 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batalha Naval: Mulheres na Ciência</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: #00f5d4;
+      margin-bottom: 5px;
+    }
+
+    p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(5px);
+    }
+
+    .main-layout {
+      display: flex;
+      gap: 30px;
+      max-width: 950px;
+      width: 100%;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* Radar / Tabuleiro */
+    .board-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      grid-template-rows: repeat(5, 60px);
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      border-radius: 15px;
+      border: 2px solid #00f5d4;
+      box-shadow: 0 0 15px rgba(0, 245, 212, 0.2);
+    }
+
+    .cell {
+      background: #1b263b;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .cell:hover:not(.hit):not(.miss) {
+      background: #415a77;
+      transform: scale(1.05);
+    }
+
+    /* Estados dos tiros */
+    .cell.miss {
+      background: #0d1b2a;
+      border-color: #778da9;
+      cursor: default;
+    }
+
+    .cell.hit {
+      background: #ff007f;
+      border-color: #ff55a3;
+      box-shadow: 0 0 10px #ff007f;
+      cursor: default;
+      animation: pulse 0.4s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* Painel de Cientistas Descobertas */
+    .log-container {
+      flex: 1;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-height: 340px;
+    }
+
+    .log-container h2 {
+      font-size: 1.2rem;
+      color: #7b2cbf;
+      margin-bottom: 12px;
+      text-align: center;
+      color: #70a1ff;
+    }
+
+    .discovery-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #00f5d4;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .discovery-card h3 {
+      font-size: 1rem;
+      color: #00f5d4;
+      margin-bottom: 3px;
+    }
+
+    .discovery-card p {
+      font-size: 0.85rem;
+      line-height: 1.3;
+      opacity: 0.9;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .win-message {
+      display: none;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #00f5d4;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #00f5d4;
+      color: #0d1b2a;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #00c4a7;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📡 Radar Científico: Batalha de Conhecimento</h1>
+    <p>Explore o radar para encontrar os laboratórios secretos das grandes cientistas!</p>
+  </header>
+
+  <div class="stats">
+    <span>Tiros Dados: <span id="shots">0</span></span>
+    <span>Cientistas Reveladas: <span id="found">0</span> / 4</span>
+  </div>
+
+  <div class="main-layout">
+    <div class="board-container">
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="log-container">
+      <h2>📜 Ficha de Descobertas</h2>
+      <div id="discoveryLog">
+        <p style="text-align: center; opacity: 0.5; font-style: italic; margin-top: 40px;" id="emptyMsg">
+          Dê tiros no radar para localizar os laboratórios escondidos!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="win-message" id="winMessage">
+    🎉 Missão Cumprida! Você localizou todos os laboratórios e revelou a história das cientistas!
+  </div>
+
+  <button onclick="initGame()">Reiniciar Radar</button>
+
+  <script>
+    // Configuração dos "Navios / Laboratórios"
+    const scientistDatabase = [
+      {
+        id: "curie",
+        name: "Marie Curie",
+        size: 3,
+        desc: "Pioneira nos estudos sobre radioatividade, primeira mulher a ganhar um Prêmio Nobel e a única pessoa a ganhar em duas áreas científicas diferentes (Física e Química).",
+        coords: [0, 1, 2] // Células 0, 1, 2 (Linha 1)
+      },
+      {
+        id: "lovelace",
+        name: "Ada Lovelace",
+        size: 2,
+        desc: "Matemática e escritora inglesa, reconhecida por ter escrito o primeiro algoritmo para ser processado por uma máquina — a mãe da programação moderna.",
+        coords: [8, 13] // Células na vertical
+      },
+      {
+        id: "goes",
+        name: "Jaqueline Goes",
+        size: 2,
+        desc: "Biomédica brasileira que liderou a equipe responsável pelo sequenciamento do genoma do vírus SARS-CoV-2 em apenas 48 horas no Brasil.",
+        coords: [20, 21] // Células na horizontal
+      },
+      {
+        id: "bouman",
+        name: "Katie Bouman",
+        size: 1,
+        desc: "Cientista da computação que liderou o desenvolvimento do algoritmo responsável por capturar a primeiríssima imagem de um Buraco Negro na história.",
+        coords: [17] // 1 Célula
+      }
+    ];
+
+    let shots = 0;
+    let foundCount = 0;
+    let scientists = [];
+
+    function initGame() {
+      shots = 0;
+      foundCount = 0;
+      document.getElementById('shots').textContent = shots;
+      document.getElementById('found').textContent = foundCount;
+      document.getElementById('winMessage').style.display = 'none';
+
+      const log = document.getElementById('discoveryLog');
+      log.innerHTML = `
+        <p style="text-align: center; opacity: 0.5; font-style: italic; margin-top: 40px;" id="emptyMsg">
+          Dê tiros no radar para localizar os laboratórios escondidos!
+        </p>`;
+
+      // Clonar dados para manter estado do jogo
+      scientists = JSON.parse(JSON.stringify(scientistDatabase));
+
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      // Cria grade 5x5 (25 células)
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleShoot);
+        grid.appendChild(cell);
+      }
+    }
+
+    function handleShoot(e) {
+      const cell = e.target;
+      const index = parseInt(cell.dataset.index);
+
+      // Impede atirar no mesmo lugar
+      if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+
+      shots++;
+      document.getElementById('shots').textContent = shots;
+
+      let hitScientist = null;
+
+      // Verifica se acertou algum laboratório
+      scientists.forEach(sci => {
+        if (sci.coords.includes(index)) {
+          hitScientist = sci;
+        }
+      });
+
+      if (hitScientist) {
+        cell.classList.add('hit');
+        cell.textContent = '🧪';
+
+        // Remove a coordenada atingida
+        hitScientist.coords = hitScientist.coords.filter(c => c !== index);
+
+        // Se o laboratório foi completamente afundado/revelado
+        if (hitScientist.coords.length === 0) {
+          revealScientist( 
