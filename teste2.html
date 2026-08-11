@@ -1,570 +1,443 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Galáxia das Cientistas</title>
-    <style>
-        /* Reset e estilo base */
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-            background-color: black;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galáxia das Mulheres na Ciência — Dia D Tecnologia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #05040f;
+    --gold: #f4c95d;
+    --violet: #b98bff;
+    --ink: #f0eef7;
+    --dim: #a29bc4;
+  }
+  html, body { margin:0; padding:0; background:var(--bg); overflow:hidden; height:100%; font-family:'Inter', sans-serif; }
+  canvas { display:block; touch-action:none; }
 
-        /* Renderizador CSS2D ocupa toda a tela, por cima do WebGL */
-        #label-renderer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            /* permite cliques apenas nos labels */;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
+  #hud {
+    position:fixed; inset:0; pointer-events:none; z-index:5;
+    font-family:'Inter', sans-serif;
+  }
+  #title-block {
+    position:absolute; top:24px; left:24px; color:var(--ink);
+    max-width:340px;
+  }
+  #title-block .eyebrow {
+    font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--gold); font-weight:600; margin-bottom:6px;
+  }
+  #title-block h1 {
+    font-family:'Fraunces', serif; font-weight:600; font-size:26px;
+    margin:0 0 6px 0; line-height:1.15; color:var(--ink);
+  }
+  #title-block p {
+    font-size:12.5px; color:var(--dim); line-height:1.5; margin:0;
+  }
 
-        /* Cada label é um cartão clicável */
-        .label-card {
-            pointer-events: auto;
-            cursor: pointer;
-            background: rgba(20, 20, 40, 0.7);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 12px 18px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(100, 150, 255, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            color: white;
-            min-width: 120px;
-            max-width: 180px;
-            will-change: transform;
-            font-size: 14px;
-            line-height: 1.4;
-        }
+  #legend {
+    position:absolute; bottom:22px; left:24px; display:flex; flex-direction:column; gap:6px;
+    background:rgba(10,8,25,0.45); border:1px solid rgba(244,201,93,0.15);
+    padding:12px 14px; border-radius:10px; backdrop-filter: blur(6px);
+  }
+  #legend .row { display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--dim); }
+  #legend .dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
 
-        .label-card:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 50px rgba(100, 200, 255, 0.5);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
+  #vr-hint {
+    position:absolute; top:24px; right:24px; color:var(--dim); font-size:11.5px;
+    text-align:right; max-width:220px; line-height:1.5;
+  }
+  #vr-hint b { color:var(--gold); }
 
-        .label-card .nome {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #aaccff;
-            text-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
-        }
-
-        .label-card .area {
-            font-size: 0.85em;
-            opacity: 0.8;
-            margin-top: 4px;
-            color: #d0e0ff;
-        }
-
-        /* Modal de detalhes */
-        #modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            pointer-events: auto;
-            animation: fadeIn 0.3s ease;
-        }
-
-        #modal-overlay.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-content {
-            background: rgba(10, 10, 30, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 32px;
-            padding: 40px 48px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 0 80px rgba(50, 100, 255, 0.3);
-            color: white;
-            text-align: center;
-            position: relative;
-        }
-
-        .modal-content .foto-placeholder {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #2a3a6a, #0a0a1a);
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            border: 2px solid #4a6a9a;
-            box-shadow: 0 0 40px rgba(70, 130, 255, 0.3);
-        }
-
-        .modal-content h2 {
-            font-size: 2em;
-            margin: 0 0 8px;
-            color: #aaccff;
-        }
-
-        .modal-content .area-detalhe {
-            font-size: 1.1em;
-            opacity: 0.8;
-            margin-bottom: 16px;
-            color: #b0c8f0;
-        }
-
-        .modal-content .bio {
-            font-size: 1em;
-            line-height: 1.6;
-            opacity: 0.9;
-            margin-bottom: 24px;
-        }
-
-        .modal-content .fechar {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 40px;
-            padding: 10px 28px;
-            color: white;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.2s;
-            pointer-events: auto;
-        }
-
-        .modal-content .fechar:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Instrução no canto */
-        #instrucao {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-            z-index: 500;
-            text-align: center;
-            white-space: nowrap;
-            font-weight: 300;
-            letter-spacing: 0.5px;
-        }
-
-        @media (max-width: 600px) {
-            .label-card {
-                font-size: 11px;
-                padding: 8px 12px;
-                min-width: 80px;
-            }
-            .modal-content {
-                padding: 28px 20px;
-            }
-            #instrucao {
-                font-size: 0.7em;
-                padding: 6px 16px;
-                bottom: 16px;
-                white-space: normal;
-            }
-        }
-    </style>
+  /* VRButton gets injected by three.js — restyle it a bit */
+  #VRButton {
+    background: rgba(244,201,93,0.12) !important;
+    border: 1px solid var(--gold) !important;
+    color: var(--gold) !important;
+    font-family:'Inter', sans-serif !important;
+  }
+</style>
 </head>
 <body>
 
-    <!-- Instrução -->
-    <div id="instrucao">👆 Toque / pinça em um cartão para conhecer a cientista</div>
+<div id="hud">
+  <div id="title-block">
+    <div class="eyebrow">Dia D Tecnologia</div>
+    <h1>Galáxia das Mulheres na Ciência</h1>
+    <p>Cada estrela é uma cientista. Aponte e faça o gesto de pinça para revelar sua história — ou apenas observe: as informações vão passando sozinhas.</p>
+  </div>
+  <div id="vr-hint">Modo desktop: <b>clique</b> numa estrela.<br>No Quest 3S: <b>pinça</b> com a mão para selecionar.<br>As informações aparecem no centro da tela.</div>
+  <div id="legend"></div>
+</div>
 
-    <!-- Modal -->
-    <div id="modal-overlay">
-        <div class="modal-content">
-            <div class="foto-placeholder" id="modal-foto">👩‍🔬</div>
-            <h2 id="modal-nome">Nome</h2>
-            <div class="area-detalhe" id="modal-area">Área</div>
-            <div class="bio" id="modal-bio">Biografia</div>
-            <button class="fechar" id="modal-fechar">✕ Fechar</button>
-        </div>
-    </div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 
-    <!-- Renderizador CSS2D será inserido aqui pelo Three.js -->
-    <div id="label-renderer"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 
-    <!-- Import Maps e código principal -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
+/* ---------------------------------------------------------------
+   DADOS — Mulheres na ciência
+--------------------------------------------------------------- */
+const FIELDS = {
+  fisica:      { label: 'Física',        color: '#5aa9ff' },
+  quimica:     { label: 'Química',       color: '#6fe3b4' },
+  biologia:    { label: 'Biologia',      color: '#f4c95d' },
+  matematica:  { label: 'Matemática/TI', color: '#c792ea' },
+  astronomia:  { label: 'Astronomia',    color: '#7fd8e8' },
+  medicina:    { label: 'Medicina',      color: '#ff8fa3' },
+};
 
-    <script type="module">
-        // ----- IMPORTS -----
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+const WOMEN = [
+  { name:'Marie Curie', years:'1867–1934', field:'fisica',
+    bio:'Pioneira no estudo da radioatividade, foi a primeira pessoa a ganhar dois prêmios Nobel, em Física e em Química, abrindo caminho para gerações de cientistas.' },
+  { name:'Ada Lovelace', years:'1815–1852', field:'matematica',
+    bio:'Matemática britânica considerada autora do primeiro algoritmo destinado a ser processado por uma máquina, sendo vista como precursora da programação.' },
+  { name:'Rosalind Franklin', years:'1920–1958', field:'quimica',
+    bio:'Suas imagens de difração de raios X foram decisivas para desvendar a estrutura em dupla hélice do DNA, um marco da biologia molecular.' },
+  { name:'Katherine Johnson', years:'1918–2020', field:'matematica',
+    bio:'Matemática da NASA cujos cálculos de trajetória garantiram o sucesso de missões espaciais como a do Mercury-Atlas 6 e o programa Apollo.' },
+  { name:'Chien-Shiung Wu', years:'1912–1997', field:'fisica',
+    bio:'Física experimental que derrubou o princípio da conservação da paridade, um dos experimentos mais importantes da física do século XX.' },
+  { name:'Grace Hopper', years:'1906–1992', field:'matematica',
+    bio:'Almirante e cientista da computação que criou um dos primeiros compiladores, tornando a programação mais acessível através de linguagens legíveis por humanos.' },
+  { name:'Vera Rubin', years:'1928–2016', field:'astronomia',
+    bio:'Astrônoma cujas observações das velocidades de rotação de galáxias forneceram evidências decisivas para a existência da matéria escura.' },
+  { name:'Rita Levi-Montalcini', years:'1909–2012', field:'medicina',
+    bio:'Neurologista que descobriu o fator de crescimento neural, revolucionando o entendimento sobre o desenvolvimento do sistema nervoso.' },
+  { name:'Jocelyn Bell Burnell', years:'1943–', field:'astronomia',
+    bio:'Detectou os primeiros sinais de pulsares durante seu doutorado, uma descoberta fundamental para a astrofísica moderna.' },
+  { name:'Bertha Lutz', years:'1894–1976', field:'biologia',
+    bio:'Bióloga e ativista brasileira, foi uma das pioneiras do feminismo no Brasil e participou da fundação das Nações Unidas defendendo direitos das mulheres.' },
+  { name:'Mayana Zatz', years:'1947–', field:'biologia',
+    bio:'Geneticista brasileira referência mundial em doenças neuromusculares e células-tronco, fundadora de um dos maiores centros de pesquisa genética do país.' },
+  { name:'Jaqueline Goes de Jesus', years:'1985–', field:'biologia',
+    bio:'Virologista brasileira que liderou a equipe que sequenciou o genoma do novo coronavírus na América Latina em tempo recorde, em 2020.' },
+  { name:'Nise da Silveira', years:'1905–1999', field:'medicina',
+    bio:'Psiquiatra brasileira que transformou o tratamento da saúde mental no país ao introduzir a arte como forma de terapia e defender práticas mais humanas.' },
+  { name:'Graziela Barroso', years:'1912–2003', field:'biologia',
+    bio:'Botânica brasileira que catalogou milhares de espécies da flora nacional, deixando um legado essencial para a preservação da biodiversidade do Brasil.' },
+  { name:'Tu Youyou', years:'1930–', field:'quimica',
+    bio:'Farmacêutica chinesa que descobriu a artemisinina, tratamento que salvou milhões de vidas contra a malária, rendendo-lhe o prêmio Nobel de Medicina.' },
+];
 
-        // ----- DADOS DAS CIENTISTAS -----
-        const cientistas = [{
-            id: 0,
-            nome: 'Marie Curie',
-            area: 'Física e Química',
-            bio: 'Pioneira no estudo da radioatividade, descobriu os elementos polônio e rádio. Primeira mulher a ganhar um Nobel e a única a ganhar em duas áreas distintas (Física e Química).',
-            emoji: '⚛️'
-        }, {
-            id: 1,
-            nome: 'Ada Lovelace',
-            area: 'Matemática',
-            bio: 'Considerada a primeira programadora da história. Escreveu o primeiro algoritmo para ser processado por uma máquina, a Máquina Analítica de Charles Babbage.',
-            emoji: '💻'
-        }, {
-            id: 2,
-            nome: 'Rosalind Franklin',
-            area: 'Química e Biofísica',
-            bio: 'Seus dados de difração de raios X (Fotografia 51) foram fundamentais para a descoberta da estrutura em dupla hélice do DNA, embora seu papel tenha sido subestimado.',
-            emoji: '🧬'
-        }, {
-            id: 3,
-            nome: 'Katherine Johnson',
-            area: 'Matemática e Física',
-            bio: 'Matemática da NASA, calculou trajetórias de voo para as missões Mercury e Apollo, incluindo a Apollo 11. Sua história foi contada no filme "Estrelas Além do Tempo".',
-            emoji: '🚀'
-        }, {
-            id: 4,
-            nome: 'Vera Rubin',
-            area: 'Astronomia',
-            bio: 'Descobriu evidências da matéria escura ao observar as curvas de rotação de galáxias. Revolucionou a astrofísica e abriu caminho para novas teorias cosmológicas.',
-            emoji: '🌌'
-        }, {
-            id: 5,
-            nome: 'Hypatia',
-            area: 'Matemática e Astronomia',
-            bio: 'Filósofa e matemática do Egito antigo, foi uma das primeiras mulheres cientistas da história. Ensinou e escreveu sobre astronomia, matemática e filosofia.',
-            emoji: '📐'
-        }, {
-            id: 6,
-            nome: 'Grace Hopper',
-            area: 'Ciência da Computação',
-            bio: 'Almirante da Marinha dos EUA e cientista da computação. Pioneira no desenvolvimento de compiladores e linguagens de programação, criou o termo "bug".',
-            emoji: '🖥️'
-        }, {
-            id: 7,
-            nome: 'Jane Goodall',
-            area: 'Biologia e Primatologia',
-            bio: 'Revolucionou o estudo dos primatas com suas observações sobre chimpanzés na Tanzânia. Mostrou que eles usam ferramentas, o que mudou a visão sobre a inteligência animal.',
-            emoji: '🐒'
-        }, {
-            id: 8,
-            nome: 'Mary Somerville',
-            area: 'Ciência e Divulgação',
-            bio: 'Cientista e divulgadora escocesa, traduziu e popularizou obras científicas. O termo "cientista" foi cunhado para ela, pois seu conhecimento abrangia várias áreas.',
-            emoji: '📚'
-        }, {
-            id: 9,
-            nome: 'Mae Jemison',
-            area: 'Astronáutica e Medicina',
-            bio: 'Primeira mulher afro-americana a viajar ao espaço, a bordo do ônibus espacial Endeavour. Também é médica e ativista pela educação em ciências.',
-            emoji: '👩🏾‍🚀'
-        }];
+/* ---------------------------------------------------------------
+   CENA BÁSICA
+--------------------------------------------------------------- */
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x05040f, 0.011);
 
-        // ----- CENA PRINCIPAL -----
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050510);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.set(0, 9, 22);
 
-        // Câmera
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 4, 18);
-        camera.lookAt(0, 0, 0);
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.xr.enabled = true;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild(VRButton.createButton(renderer, { optionalFeatures: ['hand-tracking', 'local-floor'] }));
 
-        // Renderizador WebGL
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = false;
-        document.body.appendChild(renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.35;
+controls.minDistance = 4;
+controls.maxDistance = 45;
 
-        // Renderizador CSS2D (labels)
-        const labelRenderer = new CSS2DRenderer();
-        labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        labelRenderer.domElement.style.position = 'absolute';
-        labelRenderer.domElement.style.top = '0';
-        labelRenderer.domElement.style.left = '0';
-        labelRenderer.domElement.style.pointerEvents = 'none'; // cliques nos labels por eventos próprios
-        document.getElementById('label-renderer').appendChild(labelRenderer.domElement);
+scene.add(new THREE.AmbientLight(0x8888ff, 0.4));
+const coreLight = new THREE.PointLight(0xffd27a, 3, 40);
+coreLight.position.set(0,0,0);
+scene.add(coreLight);
 
-        // Controles Orbit (para desktop / VR com toque)
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.autoRotate = false;
-        controls.enableZoom = true;
-        controls.rotateSpeed = 0.5;
-        controls.target.set(0, 0, 0);
-        controls.update();
+/* ---------------------------------------------------------------
+   GALÁXIA DE PARTÍCULAS (espiral)
+--------------------------------------------------------------- */
+function buildGalaxy(){
+  const count = 16000, radius = 15, branches = 5, spin = 1.15, randomness = 0.42, randomnessPower = 3;
+  const insideColor = new THREE.Color('#ffd27a');
+  const outsideColor = new THREE.Color('#3f6bd6');
 
-        // ----- LUZES -----
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count*3);
+  const colors = new Float32Array(count*3);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(1, 2, 3);
-        scene.add(dirLight);
+  for(let i=0;i<count;i++){
+    const i3 = i*3;
+    const r = Math.random()*radius;
+    const branchAngle = (i % branches) / branches * Math.PI * 2;
+    const spinAngle = r * spin;
 
-        const backLight = new THREE.PointLight(0x4466ff, 0.5);
-        backLight.position.set(-2, -1, -5);
-        scene.add(backLight);
+    const rx = Math.pow(Math.random(), randomnessPower) * (Math.random()<0.5?1:-1) * randomness * r;
+    const ry = Math.pow(Math.random(), randomnessPower) * (Math.random()<0.5?1:-1) * randomness * r * 0.4;
+    const rz = Math.pow(Math.random(), randomnessPower) * (Math.random()<0.5?1:-1) * randomness * r;
 
-        // ----- GALÁXIA (partículas) -----
-        const particleCount = 12000;
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
-        const sizes = new Float32Array(particleCount);
+    positions[i3]   = Math.cos(branchAngle + spinAngle) * r + rx;
+    positions[i3+1] = ry;
+    positions[i3+2] = Math.sin(branchAngle + spinAngle) * r + rz;
 
-        const spiralArms = 3;
-        const armSpread = 0.6;
-        const radiusMax = 8;
-        const radiusMin = 1.5;
+    const mixed = insideColor.clone().lerp(outsideColor, r/radius);
+    colors[i3] = mixed.r; colors[i3+1] = mixed.g; colors[i3+2] = mixed.b;
+  }
 
-        for (let i = 0; i < particleCount; i++) {
-            // Distribuição em espiral
-            const arm = i % spiralArms;
-            const t = i / particleCount;
-            const radius = radiusMin + t * (radiusMax - radiusMin);
-            const angle = t * Math.PI * 10 + (arm / spiralArms) * Math.PI * 2;
-            const randomOffset = (Math.random() - 0.5) * armSpread * (1 + t * 0.5);
-            const x = Math.cos(angle + randomOffset) * radius;
-            const z = Math.sin(angle + randomOffset) * radius;
-            const y = (Math.random() - 0.5) * 1.2 * (1 - t * 0.3);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
 
-            positions[i * 3] = x;
-            positions[i * 3 + 1] = y;
-            positions[i * 3 + 2] = z;
+  const mat = new THREE.PointsMaterial({
+    size:0.09, sizeAttenuation:true, depthWrite:false,
+    blending:THREE.AdditiveBlending, vertexColors:true, transparent:true, opacity:0.9
+  });
 
-            // Cor: azul / roxo / branco
-            const color = new THREE.Color();
-            const r = 0.4 + 0.6 * Math.random();
-            const g = 0.3 + 0.7 * Math.random() * (1 - t * 0.3);
-            const b = 0.6 + 0.4 * Math.random() * (1 + t * 0.2);
-            color.setRGB(r, g, b);
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+  return points;
+}
+const galaxy = buildGalaxy();
 
-            sizes[i] = 0.05 + 0.15 * Math.random() * (1 + t);
-        }
+/* ---------------------------------------------------------------
+   TEXTURA DE CANVAS PARA LABEL / PAINEL
+--------------------------------------------------------------- */
+function makeLabelSprite(text, color){
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.font = '600 30px Inter, sans-serif';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 6;
+  ctx.fillText(text, 128, 40);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(2.2, 0.55, 1);
+  return sprite;
+}
 
-        const particleGeometry = new THREE.BufferGeometry();
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+/* ---------------------------------------------------------------
+   ESTRELAS DAS CIENTISTAS
+--------------------------------------------------------------- */
+const starGroup = new THREE.Group();
+scene.add(starGroup);
+const starMeshes = [];
 
-        const particleTexture = (() => {
-            const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
-            const ctx = canvas.getContext('2d');
-            const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-            gradient.addColorStop(0, 'rgba(255,255,255,1)');
-            gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
-            gradient.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 32, 32);
-            return new THREE.CanvasTexture(canvas);
-        })();
+WOMEN.forEach((woman, i) => {
+  const field = FIELDS[woman.field];
+  const branch = i % 5;
+  const rNorm = i / WOMEN.length;
+  const r = 2.2 + rNorm * 12.5;
+  const angle = (branch/5)*Math.PI*2 + r*1.15;
+  const y = (Math.sin(i*12.9) * 0.6);
 
-        const particleMaterial = new THREE.PointsMaterial({
-            size: 0.12,
-            map: particleTexture,
-            vertexColors: true,
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            sizeAttenuation: true,
-        });
+  const geo = new THREE.SphereGeometry(0.22, 20, 20);
+  const mat = new THREE.MeshStandardMaterial({
+    color: field.color, emissive: field.color, emissiveIntensity: 1.4, roughness:0.35
+  });
+  const star = new THREE.Mesh(geo, mat);
+  star.position.set(Math.cos(angle)*r, y, Math.sin(angle)*r);
+  star.userData = woman;
+  starGroup.add(star);
+  starMeshes.push(star);
 
-        const particles = new THREE.Points(particleGeometry, particleMaterial);
-        scene.add(particles);
+  const glow = new THREE.PointLight(field.color, 0.6, 3);
+  star.add(glow);
 
-        // ----- GRUPO PARA GALÁXIA + LABELS (gira junto) -----
-        const galaxyGroup = new THREE.Group();
-        scene.add(galaxyGroup);
+  const label = makeLabelSprite(woman.name, field.color);
+  label.position.set(0, 0.55, 0);
+  star.add(label);
+});
 
-        // Adicionar partículas ao grupo? Melhor manter separado para não girar? Vamos girar o grupo e adicionar as partículas também?
-        // Vamos mover as partículas para o grupo para girar tudo junto.
-        galaxyGroup.add(particles);
+/* ---------------------------------------------------------------
+   LEGENDA HTML (visível em desktop)
+--------------------------------------------------------------- */
+const legendEl = document.getElementById('legend');
+Object.values(FIELDS).forEach(f=>{
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<span class="dot" style="background:${f.color}"></span>${f.label}`;
+  legendEl.appendChild(row);
+});
 
-        // ----- CRIAR LABELS (CSS2D) -----
-        const labelGroup = new THREE.Group();
-        galaxyGroup.add(labelGroup);
+/* ---------------------------------------------------------------
+   PAINEL DE INFORMAÇÃO (3D sprite, visível em VR + HTML em desktop)
+--------------------------------------------------------------- */
+const panelEl = document.getElementById('panel');
 
-        // Função para criar um cartão label
-        function createLabel(cientista, index) {
-            const div = document.createElement('div');
-            div.className = 'label-card';
-            div.dataset.id = cientista.id;
-            div.innerHTML = `
-                <div class="nome">${cientista.emoji} ${cientista.nome}</div>
-                <div class="area">${cientista.area}</div>
-            `;
-            // Evento de clique / toque
-            div.addEventListener('click', (e) => {
-                e.stopPropagation();
-                abrirModal(cientista);
-            });
-            div.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                abrirModal(cientista);
-            }, { passive: false });
+function drawInfoCanvas(woman){
+  const field = FIELDS[woman.field];
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 480;
+  const ctx = canvas.getContext('2d');
 
-            const label = new CSS2DObject(div);
-            return label;
-        }
+  ctx.fillStyle = 'rgba(8,6,20,0.86)';
+  roundRect(ctx, 0,0, canvas.width, canvas.height, 28); ctx.fill();
+  ctx.strokeStyle = field.color; ctx.lineWidth = 3;
+  roundRect(ctx, 3,3, canvas.width-6, canvas.height-6, 26); ctx.stroke();
 
-        // Posicionar labels em órbita espiral, mas com raio um pouco maior que as partículas
-        const numLabels = cientistas.length;
-        const labelRadiusMin = 3.5;
-        const labelRadiusMax = 7.5;
+  ctx.fillStyle = field.color;
+  ctx.font = '600 26px Inter, sans-serif';
+  ctx.fillText(field.label.toUpperCase(), 48, 70);
 
-        cientistas.forEach((c, i) => {
-            const label = createLabel(c, i);
-            const t = i / numLabels;
-            const radius = labelRadiusMin + t * (labelRadiusMax - labelRadiusMin);
-            const angle = t * Math.PI * 8 + 0.5; // +0.5 para não coincidir
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-            const y = (Math.random() - 0.5) * 1.8;
-            label.position.set(x, y, z);
-            // Pequena variação
-            label.userData = { angle, radius, y };
-            labelGroup.add(label);
-        });
+  ctx.fillStyle = '#f0eef7';
+  ctx.font = '600 54px Fraunces, serif';
+  ctx.fillText(woman.name, 48, 150);
 
-        // Adicionar algumas estrelas de fundo (bem distantes)
-        const starGeo = new THREE.BufferGeometry();
-        const starCount = 2000;
-        const starPos = new Float32Array(starCount * 3);
-        for (let i = 0; i < starCount; i++) {
-            const r = 50 + Math.random() * 100;
-            const theta = Math.random() * Math.PI * 2;
-            const phi = Math.acos(2 * Math.random() - 1);
-            starPos[i * 3] = Math.sin(phi) * Math.cos(theta) * r;
-            starPos[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * r;
-            starPos[i * 3 + 2] = Math.cos(phi) * r;
-        }
-        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({
-            color: 0x8888aa,
-            size: 0.3,
-            transparent: true,
-            opacity: 0.6,
-            sizeAttenuation: true,
-        });
-        const stars = new THREE.Points(starGeo, starMat);
-        scene.add(stars);
+  ctx.fillStyle = '#a29bc4';
+  ctx.font = '400 26px Inter, sans-serif';
+  ctx.fillText(woman.years, 48, 195);
 
-        // ----- MODAL -----
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalNome = document.getElementById('modal-nome');
-        const modalArea = document.getElementById('modal-area');
-        const modalBio = document.getElementById('modal-bio');
-        const modalFoto = document.getElementById('modal-foto');
-        const modalFechar = document.getElementById('modal-fechar');
+  ctx.fillStyle = '#dcd8ef';
+  ctx.font = '400 30px Inter, sans-serif';
+  wrapText(ctx, woman.bio, 48, 260, canvas.width-96, 42);
 
-        function abrirModal(cientista) {
-            modalNome.textContent = cientista.nome;
-            modalArea.textContent = cientista.area;
-            modalBio.textContent = cientista.bio;
-            modalFoto.textContent = cientista.emoji || '👩‍🔬';
-            modalOverlay.classList.add('active');
-        }
+  return canvas;
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '';
+  for(let n=0;n<words.length;n++){
+    const test = line + words[n] + ' ';
+    if(ctx.measureText(test).width > maxWidth && n>0){
+      ctx.fillText(line, x, y); line = words[n]+' '; y += lineHeight;
+    } else { line = test; }
+  }
+  ctx.fillText(line, x, y);
+}
 
-        function fecharModal() {
-            modalOverlay.classList.remove('active');
-        }
+let infoSprite = null;
+function showInfo(star){
+  const woman = star.userData;
+  const field = FIELDS[woman.field];
 
-        modalFechar.addEventListener('click', fecharModal);
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) fecharModal();
-        });
+  // Desktop HTML panel
+  panelEl.innerHTML = `
+    <div class="field" style="color:${field.color}">${field.label}</div>
+    <h2>${woman.name}</h2>
+    <div class="years">${woman.years}</div>
+    <p>${woman.bio}</p>`;
+  panelEl.classList.add('show');
 
-        // ----- AJUSTE DE TELA -----
-        function onResize() {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w, h);
-            labelRenderer.setSize(w, h);
-        }
-        window.addEventListener('resize', onResize);
+  // 3D sprite panel (visible in VR)
+  if(infoSprite){ scene.remove(infoSprite); }
+  const canvas = drawInfoCanvas(woman);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false });
+  infoSprite = new THREE.Sprite(mat);
+  infoSprite.scale.set(3.6, 1.92, 1);
+  const p = star.getWorldPosition(new THREE.Vector3());
+  infoSprite.position.set(p.x*1.15, p.y + 1.1, p.z*1.15);
+  scene.add(infoSprite);
 
-        // ----- ANIMAÇÃO -----
-        let clock = new THREE.Clock();
+  activeStar = star;
+  lastInteraction = performance.now();
+}
 
-        function animate() {
-            const delta = clock.getDelta();
-            const elapsed = performance.now() / 1000;
+/* ---------------------------------------------------------------
+   SELEÇÃO — clique (desktop) e pinça (VR)
+--------------------------------------------------------------- */
+const raycaster = new THREE.Raycaster();
+let activeStar = null;
+let lastInteraction = 0;
 
-            // Girar galáxia lentamente
-            galaxyGroup.rotation.y += delta * 0.05;
+// Desktop click
+renderer.domElement.addEventListener('click', (e)=>{
+  const mouse = new THREE.Vector2(
+    (e.clientX/window.innerWidth)*2-1,
+    -(e.clientY/window.innerHeight)*2+1
+  );
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(starMeshes);
+  if(hits.length) showInfo(hits[0].object);
+});
 
-            // Pequena flutuação nos labels (efeito orgânico)
-            labelGroup.children.forEach((label, i) => {
-                const offset = Math.sin(elapsed * 0.5 + i) * 0.03;
-                label.position.y += Math.sin(elapsed * 0.7 + i * 1.2) * 0.001;
-            });
+// VR controllers / hand pinch (fires 'select' on pinch when hand-tracking is used)
+function setupXRInput(index){
+  const controller = renderer.xr.getController(index);
+  controller.addEventListener('selectstart', ()=>{
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0,0,-1).applyMatrix4(tempMatrix);
+    const hits = raycaster.intersectObjects(starMeshes);
+    if(hits.length) showInfo(hits[0].object);
+  });
+  scene.add(controller);
 
-            // Rotação das estrelas de fundo bem lenta
-            stars.rotation.y += delta * 0.003;
+  const grip = renderer.xr.getControllerGrip(index);
+  grip.add(new XRControllerModelFactory().createControllerModel(grip));
+  scene.add(grip);
 
-            controls.update();
+  const hand = renderer.xr.getHand(index);
+  hand.add(new XRHandModelFactory().createHandModel(hand, 'mesh'));
+  scene.add(hand);
+}
+setupXRInput(0);
+setupXRInput(1);
 
-            // Renderizar
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
+/* ---------------------------------------------------------------
+   AUTOPLAY — as informações vão passando sozinhas
+--------------------------------------------------------------- */
+let autoIndex = 0;
+const AUTOPLAY_INTERVAL = 9000;
+const IDLE_BEFORE_RESUME = 12000;
 
-            requestAnimationFrame(animate);
-        }
+setInterval(()=>{
+  const idle = performance.now() - lastInteraction;
+  if(idle > IDLE_BEFORE_RESUME || lastInteraction === 0){
+    showInfo(starMeshes[autoIndex]);
+    lastInteraction = 0; // keep as "autoplay", not user interaction
+    autoIndex = (autoIndex+1) % starMeshes.length;
+  }
+}, AUTOPLAY_INTERVAL);
 
-        animate();
+// kick off immediately
+showInfo(starMeshes[0]);
+autoIndex = 1;
 
-        // Pequeno helper: se clicar fora dos labels, não faz nada
-        renderer.domElement.addEventListener('click', () => {});
+/* ---------------------------------------------------------------
+   LOOP
+--------------------------------------------------------------- */
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(()=>{
+  const t = clock.getElapsedTime();
+  galaxy.rotation.y = t * 0.02;
+  starGroup.rotation.y = t * 0.02;
 
-        console.log('🚀 Galáxia das Cientistas carregada! Toque nos cartões para saber mais.');
-    </script>
+  starMeshes.forEach((s,i)=>{
+    const pulse = 1 + Math.sin(t*2 + i)*0.08;
+    s.scale.setScalar(s===activeStar ? pulse*1.6 : pulse);
+  });
+
+  if(infoSprite && activeStar){
+    infoSprite.lookAt(camera.position);
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
 </body>
 </html>
