@@ -1,191 +1,716 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mulheres na Ciência — Dia D da Tecnologia</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Short+Stack&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mulheres na Ciência · Museu Doodle</title>
+    <!-- Google Fonts manuscritas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@400;600;700&family=Indie+Flower&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    /* Reset e base de caderno/papel */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        body {
+            min-height: 100vh;
+            background-color: #faf4e6;
+            background-image:
+                /* linhas de caderno */
+                repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 23px,
+                    rgba(66, 133, 244, 0.15) 23px,
+                    rgba(66, 133, 244, 0.15) 24px),
+                /* textura de papel (ruído sutil) */
+                radial-gradient(ellipse at 20% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 70%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 70%),
+                repeating-linear-gradient(45deg,
+                    rgba(0, 0, 0, 0.01) 0px,
+                    rgba(0, 0, 0, 0.01) 2px,
+                    transparent 2px,
+                    transparent 6px);
+            font-family: 'Caveat', 'Indie Flower', cursive;
+            color: #1e1e2a;
+            padding: 20px 16px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    body {
-      background-color: #faf6ee;
-      /* Padrao sutil de fundo estilo papel quadriculado/pontilhado */
-      background-image: radial-gradient(#d3cbb7 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
-      color: #2b2b2b;
-      font-family: 'Patrick Hand', cursive;
-      font-size: 1.2rem;
-      padding: 30px 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+        /* ===== DECORAÇÕES FLUTUANTES (doodles) ===== */
+        .doodle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            font-size: 2rem;
+            color: rgba(26, 115, 232, 0.20);
+            transform: rotate(var(--rot, 0deg));
+            user-select: none;
+        }
+        .doodle--star {
+            color: rgba(244, 180, 0, 0.30);
+        }
+        .doodle--atom {
+            color: rgba(233, 30, 140, 0.20);
+            font-size: 2.8rem;
+        }
+        .doodle--arrow {
+            color: rgba(217, 48, 37, 0.25);
+            font-size: 2.4rem;
+        }
 
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-      transform: rotate(-1.5deg); /* Leve inclinação para quebrar alinhamento */
-    }
+        /* ===== CONTAINER PRINCIPAL ===== */
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
 
-    /* Titulo principal com fonte marcante */
-    h1 {
-      font-family: 'Caveat', cursive;
-      font-size: 3.5rem;
-      color: #1a1a1a;
-      line-height: 1;
-      margin-bottom: 10px;
-    }
+        /* ===== TIPOGRAFIA ===== */
+        h1,
+        h2,
+        h3,
+        .logo-title,
+        .btn-enter {
+            font-family: 'Permanent Marker', 'Caveat', cursive;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+        }
 
-    /* Efeito de marca-texto amarelo */
-    .highlight {
-      background: linear-gradient(100deg, rgba(255, 235, 59, 0) 1%, rgba(255, 235, 59, 0.8) 2.5%, rgba(255, 235, 59, 0.6) 98%);
-      padding: 0 8px;
-      border-radius: 8px 0px 12px 2px;
-    }
+        .logo-tag,
+        .hero-subtitle,
+        .controls-hint,
+        .credit-info p,
+        footer {
+            font-family: 'Caveat', 'Indie Flower', cursive;
+        }
 
-    p.subtitle {
-      font-size: 1.4rem;
-      color: #555;
-    }
+        .hero-description,
+        .feature-card p,
+        .credit-info h4 {
+            font-family: 'Caveat', cursive;
+        }
 
-    /* Container desalinhado */
-    .cards-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      max-width: 900px;
-      justify-content: center;
-      width: 100%;
-    }
+        /* ===== HEADER (rabiscado) ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(255, 247, 235, 0.6);
+            border: 3px dashed #1a73e8;
+            border-radius: 30px 10px 30px 10px;
+            box-shadow: 0 0 0 2px #e91e8c, 0 0 0 4px #34a853;
+            transform: rotate(-0.8deg);
+            backdrop-filter: blur(2px);
+            position: relative;
+        }
+        header::before {
+            content: "✧";
+            position: absolute;
+            top: -16px;
+            left: 10px;
+            font-size: 2rem;
+            color: #f4b400;
+            transform: rotate(-15deg);
+        }
+        header::after {
+            content: "✎";
+            position: absolute;
+            bottom: -20px;
+            right: 16px;
+            font-size: 2.2rem;
+            color: #e91e8c;
+            transform: rotate(12deg);
+        }
 
-    /* Card estilo rabisco/esboço */
-    .sketch-card {
-      background: #ffffff;
-      border: 3px solid #2b2b2b;
-      /* Borda imperfeita (desenhada à mão) usando border-radius assimétrico */
-      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-      padding: 25px;
-      width: 260px;
-      box-shadow: 5px 6px 0px #2b2b2b; /* Sombra sólida estilo HQ */
-      transition: all 0.2s ease;
-      position: relative;
-    }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .logo-tag {
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            color: #d93025;
+            font-weight: 600;
+            transform: rotate(-2deg);
+            text-decoration: underline wavy #f4b400 2px;
+        }
+        .logo-title {
+            font-size: 1.8rem;
+            color: #1a73e8;
+            transform: rotate(1.5deg);
+            text-shadow: 3px 3px 0 rgba(233, 30, 140, 0.15);
+        }
 
-    /* Rotações individuais intencionais (ordem no caos) */
-    .sketch-card:nth-child(1) { transform: rotate(-2deg); }
-    .sketch-card:nth-child(2) { transform: rotate(1.5deg); margin-top: 15px; }
-    .sketch-card:nth-child(3) { transform: rotate(-1deg); }
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px 6px 12px;
+            background: rgba(255, 235, 59, 0.25);
+            border: 2px dashed #34a853;
+            border-radius: 40px 8px 40px 8px;
+            font-size: 1rem;
+            font-family: 'Caveat', cursive;
+            color: #1a73e8;
+            transform: rotate(2deg);
+        }
+        .status-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #34a853;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px #f4b400;
+            animation: pisca 1.8s infinite;
+        }
+        @keyframes pisca {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
 
-    .sketch-card:hover {
-      transform: scale(1.05) rotate(0deg) !important;
-      box-shadow: 8px 10px 0px #ff4081;
-      border-color: #ff4081;
-    }
+        /* ===== HERO ===== */
+        .hero {
+            text-align: center;
+            padding: 30px 10px 20px;
+            position: relative;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            color: #d93025;
+            font-weight: 700;
+            transform: rotate(-1.5deg);
+            background: rgba(255, 235, 59, 0.3);
+            display: inline-block;
+            padding: 0 16px;
+            border-radius: 30px 0 30px 0;
+            margin-bottom: 10px;
+        }
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 5.5rem);
+            line-height: 1.1;
+            color: #1a73e8;
+            transform: rotate(-1.2deg);
+            text-shadow: 5px 5px 0 rgba(244, 180, 0, 0.25), 8px 8px 0 rgba(233, 30, 140, 0.10);
+            margin: 8px 0 12px;
+            position: relative;
+            display: inline-block;
+        }
+        .hero-title::after {
+            content: "✦";
+            position: absolute;
+            top: -10px;
+            right: -40px;
+            font-size: 2.8rem;
+            color: #f4b400;
+            transform: rotate(20deg);
+        }
+        .hero-title::before {
+            content: "✧";
+            position: absolute;
+            bottom: -10px;
+            left: -30px;
+            font-size: 2.4rem;
+            color: #e91e8c;
+            transform: rotate(-15deg);
+        }
 
-    .card-tag {
-      font-family: 'Short Stack', cursive;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      background: #e1f5fe;
-      border: 2px solid #2b2b2b;
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px 3px 15px 5px;
-      margin-bottom: 12px;
-    }
+        .hero-description {
+            max-width: 680px;
+            margin: 6px auto 24px;
+            font-size: 1.35rem;
+            line-height: 1.6;
+            color: #2c2c3a;
+            background: rgba(255, 247, 235, 0.5);
+            padding: 10px 20px;
+            border-radius: 50px 8px 50px 8px;
+            border: 2px dotted #34a853;
+            transform: rotate(0.8deg);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.04);
+        }
+        /* marca-texto */
+        .highlight {
+            background: rgba(255, 235, 59, 0.6);
+            padding: 0 6px;
+            transform: rotate(-1.5deg) scale(1.02);
+            display: inline-block;
+            font-weight: 700;
+            border-radius: 4px 0 8px 0;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05);
+        }
 
-    .sketch-card h2 {
-      font-family: 'Caveat', cursive;
-      font-size: 2.2rem;
-      margin-bottom: 8px;
-    }
+        /* ===== CTA ===== */
+        .cta-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin: 6px 0 10px;
+        }
+        .btn-enter {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 36px;
+            font-size: 1.6rem;
+            color: #1a1a2a;
+            background: #fef9f0;
+            border: 4px double #1a73e8;
+            border-radius: 60px 12px 60px 12px;
+            box-shadow: 0 0 0 3px #f4b400, 0 8px 0 rgba(0, 0, 0, 0.08);
+            transform: rotate(-0.5deg);
+            transition: all 0.15s ease;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+        }
+        .btn-enter:hover {
+            transform: rotate(0.5deg) scale(1.02);
+            background: #fffcf5;
+            box-shadow: 0 0 0 3px #e91e8c, 0 8px 0 rgba(0, 0, 0, 0.06);
+            border-color: #e91e8c;
+        }
+        .btn-enter svg {
+            width: 30px;
+            height: 30px;
+            stroke: #d93025;
+            stroke-width: 2.5;
+            fill: none;
+            transition: transform 0.2s ease;
+        }
+        .btn-enter:hover svg {
+            transform: translateX(8px) rotate(-5deg);
+        }
+        .btn-enter::after {
+            content: "✏️";
+            position: absolute;
+            top: -16px;
+            right: -18px;
+            font-size: 1.8rem;
+            transform: rotate(25deg);
+        }
+        .btn-enter::before {
+            content: "⬅️";
+            position: absolute;
+            bottom: -16px;
+            left: -18px;
+            font-size: 1.8rem;
+            transform: rotate(-10deg);
+        }
 
-    .sketch-card p {
-      line-height: 1.3;
-      font-size: 1.1rem;
-      color: #444;
-    }
+        .controls-hint {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 20px;
+            font-size: 1.1rem;
+            color: #2c2c3a;
+            background: rgba(255, 247, 235, 0.7);
+            padding: 8px 22px;
+            border-radius: 60px 8px 60px 8px;
+            border: 2px dashed #f4b400;
+            transform: rotate(1.2deg);
+            backdrop-filter: blur(2px);
+        }
+        .controls-hint span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .key-badge {
+            background: rgba(26, 115, 232, 0.12);
+            color: #1a73e8;
+            padding: 2px 12px;
+            border-radius: 20px 4px 20px 4px;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1rem;
+            border: 2px solid #1a73e8;
+            transform: rotate(-2deg);
+        }
 
-    /* Rabisco / Elemento decorativo desenhado */
-    .doodle-star {
-      position: absolute;
-      top: -15px;
-      right: -10px;
-      font-size: 1.8rem;
-    }
+        /* ===== SEÇÃO FEATURES ===== */
+        .features-section {
+            padding: 10px 0 20px;
+        }
+        .section-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 2.4rem;
+            text-align: center;
+            color: #1a73e8;
+            transform: rotate(-1deg);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .section-title::after {
+            content: "✦ ✦ ✦";
+            display: block;
+            font-size: 1.2rem;
+            color: #f4b400;
+            transform: rotate(3deg);
+            margin-top: -6px;
+            letter-spacing: 6px;
+        }
 
-    /* Botão artesanal */
-    .btn-sketch {
-      margin-top: 40px;
-      font-family: 'Caveat', cursive;
-      font-size: 1.8rem;
-      font-weight: bold;
-      background: #ff80ab;
-      color: #1a1a1a;
-      padding: 10px 30px;
-      border: 3px solid #2b2b2b;
-      border-radius: 20px 255px 15px 225px/225px 15px 255px 15px;
-      box-shadow: 4px 4px 0px #2b2b2b;
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
+        .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 28px;
+        }
+        .feature-card {
+            flex: 1 1 260px;
+            max-width: 320px;
+            background: rgba(255, 247, 235, 0.7);
+            backdrop-filter: blur(2px);
+            padding: 26px 20px 22px;
+            border: 3px double #34a853;
+            border-radius: 30px 4px 30px 4px;
+            box-shadow: 0 0 0 2px #e91e8c, 0 8px 0 rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: relative;
+        }
+        .feature-card:nth-child(1) {
+            transform: rotate(-1.5deg);
+        }
+        .feature-card:nth-child(2) {
+            transform: rotate(2.2deg);
+        }
+        .feature-card:nth-child(3) {
+            transform: rotate(-0.8deg);
+        }
+        .feature-card:hover {
+            transform: rotate(0deg) scale(1.02) !important;
+            background: rgba(255, 247, 235, 0.9);
+            box-shadow: 0 0 0 3px #f4b400, 0 8px 0 rgba(0, 0, 0, 0.06);
+            border-color: #f4b400;
+        }
 
-    .btn-sketch:hover {
-      background: #ff4081;
-      color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 6px 6px 0px #2b2b2b;
-    }
+        .feature-icon {
+            font-size: 2.6rem;
+            line-height: 1;
+            margin-bottom: 12px;
+            transform: rotate(-4deg);
+            color: #d93025;
+        }
+        .feature-card h3 {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.6rem;
+            color: #1a73e8;
+            margin-bottom: 6px;
+            transform: rotate(-0.5deg);
+        }
+        .feature-card p {
+            font-size: 1.15rem;
+            line-height: 1.5;
+            color: #2c2c3a;
+        }
+        .feature-card::after {
+            content: "✧";
+            position: absolute;
+            bottom: 6px;
+            right: 12px;
+            font-size: 1.8rem;
+            color: rgba(244, 180, 0, 0.25);
+            transform: rotate(20deg);
+        }
 
-    .btn-sketch:active {
-      transform: translateY(2px);
-      box-shadow: 2px 2px 0px #2b2b2b;
-    }
-  </style>
+        /* ===== CRÉDITOS ===== */
+        .credits-section {
+            padding: 10px 0 20px;
+        }
+        .credits-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 12px;
+        }
+        .credit-card {
+            flex: 1 1 180px;
+            max-width: 220px;
+            background: rgba(255, 247, 235, 0.6);
+            border: 2.5px dashed #e91e8c;
+            border-radius: 40px 6px 40px 6px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: rotate(var(--rot, 0deg));
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.03);
+        }
+        .credit-card:nth-child(1) {
+            --rot: -1.8deg;
+        }
+        .credit-card:nth-child(2) {
+            --rot: 2.4deg;
+        }
+        .credit-card:nth-child(3) {
+            --rot: -0.6deg;
+        }
+        .credit-card:nth-child(4) {
+            --rot: 1.2deg;
+        }
+        .credit-card:nth-child(5) {
+            --rot: -2.2deg;
+        }
+        .credit-card:nth-child(6) {
+            --rot: 0.8deg;
+        }
+        .credit-card:nth-child(7) {
+            --rot: -1.0deg;
+        }
+        .credit-card:hover {
+            transform: rotate(0deg) scale(1.04) !important;
+            background: rgba(255, 247, 235, 0.9);
+            border-color: #f4b400;
+            box-shadow: 0 0 0 2px #34a853;
+        }
+
+        .credit-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50% 20% 50% 20%;
+            background: rgba(26, 115, 232, 0.12);
+            border: 2.5px solid #1a73e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.6rem;
+            color: #d93025;
+            flex-shrink: 0;
+            transform: rotate(-4deg);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.04);
+        }
+        .credit-info h4 {
+            font-size: 1.2rem;
+            color: #1a1a2a;
+            font-weight: 700;
+            transform: rotate(-0.5deg);
+        }
+        .credit-info p {
+            font-size: 0.95rem;
+            color: #5a5a6a;
+            line-height: 1.2;
+        }
+
+        .credit-card.featured-credit {
+            flex: 1 1 280px;
+            max-width: 340px;
+            border-color: #f4b400;
+            border-width: 3px;
+            background: rgba(255, 235, 59, 0.12);
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            margin-top: 20px;
+            padding: 20px 0 10px;
+            border-top: 3px wavy rgba(26, 115, 232, 0.2);
+            text-align: center;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            color: #3a3a4a;
+            transform: rotate(-0.5deg);
+        }
+        footer p:last-child {
+            font-size: 0.9rem;
+            color: #7a7a8a;
+            margin-top: 4px;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 700px) {
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .badge-status {
+                align-self: center;
+            }
+            .hero-title {
+                font-size: 3.2rem;
+            }
+            .hero-title::before,
+            .hero-title::after {
+                display: none;
+            }
+            .btn-enter {
+                font-size: 1.3rem;
+                padding: 14px 24px;
+            }
+            .btn-enter::before,
+            .btn-enter::after {
+                display: none;
+            }
+            .feature-card {
+                flex: 1 1 100%;
+                max-width: 400px;
+            }
+            .credit-card {
+                flex: 1 1 140px;
+            }
+            .controls-hint {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px 8px 20px;
+            }
+            .hero-title {
+                font-size: 2.6rem;
+            }
+            .hero-description {
+                font-size: 1.1rem;
+                padding: 8px 12px;
+            }
+            .btn-enter {
+                font-size: 1.1rem;
+                padding: 12px 18px;
+                gap: 8px;
+            }
+            .btn-enter svg {
+                width: 22px;
+                height: 22px;
+            }
+            .logo-title {
+                font-size: 1.4rem;
+            }
+            .credit-card {
+                flex: 1 1 100%;
+                max-width: 260px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>👩‍🔬 <span class="highlight">Mulheres na Ciência</span> ✏️</h1>
-    <p class="subtitle">Dia D da Tecnologia — Projeto Interativo & Artesanal</p>
-  </header>
+    <!-- ===== DECORAÇÕES FLUTUANTES ===== -->
+    <div class="doodle doodle--star" style="top:8%; left:3%; font-size:3rem; --rot:-12deg;">✦</div>
+    <div class="doodle doodle--star" style="top:18%; right:6%; font-size:2.4rem; --rot:25deg;">✧</div>
+    <div class="doodle doodle--atom" style="bottom:22%; left:2%; --rot:15deg;">⚛︎</div>
+    <div class="doodle doodle--arrow" style="top:45%; right:2%; --rot:-20deg;">➜</div>
+    <div class="doodle" style="bottom:12%; right:4%; font-size:2.8rem; color:rgba(52,168,83,0.2); --rot:-8deg;">✎</div>
+    <div class="doodle" style="top:60%; left:1%; font-size:2.2rem; color:rgba(217,48,37,0.15); --rot:30deg;">✧</div>
+    <div class="doodle doodle--star" style="bottom:35%; right:1%; font-size:2rem; --rot:-18deg;">✦</div>
 
-  <main class="cards-grid">
-    
-    <div class="sketch-card">
-      <span class="doodle-star">✨</span>
-      <span class="card-tag">Jogo #01</span>
-      <h2>Jogo da Memória</h2>
-      <p>Virar as cartas, encontrar os pares de cientistas e ler resumos sobre suas grandes descobertas!</p>
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <header>
+            <div class="logo-container">
+                <span class="logo-tag">Dia D · Tecnologia</span>
+                <span class="logo-title">Museu Virtual</span>
+            </div>
+            <div class="badge-status">
+                <span class="status-dot"></span> Exposição Interativa 3D
+            </div>
+        </header>
+
+        <!-- ===== HERO ===== -->
+        <main class="hero">
+            <p class="hero-subtitle">Dia D da Tecnologia</p>
+            <h1 class="hero-title">Mulheres na Ciência</h1>
+            <p class="hero-description">
+                Seja bem-vindo ao Museu Virtual de História e Inovação. Explore uma galeria imersiva em 3D dedicada às <span class="highlight">mulheres pioneiras</span> que revolucionaram a ciência, a física, a matemática e a tecnologia.
+            </p>
+
+            <div class="cta-container">
+                <a href="museu.html" class="btn-enter" id="enter-museum-btn">
+                    <span>Entrar no Museu</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+
+                <div class="controls-hint">
+                    <span><span class="key-badge">WASD</span> andar</span>
+                    <span><span class="key-badge">Mouse</span> olhar</span>
+                    <span><span class="key-badge">Clique</span> vitrines</span>
+                    <span><span class="key-badge">VR</span> Suportado</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- ===== FEATURES ===== -->
+        <section class="features-section">
+            <h2 class="section-title">O que você vai encontrar</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏛️</div>
+                    <h3>Ambiente 3D Imersivo</h3>
+                    <p>Navegue por um pavilhão arquitetônico modelado em 3D, com iluminação dinâmica e atmosfera futurista.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>Pioneiras da História</h3>
+                    <p>Exposições sobre Ada Lovelace, Marie Curie, Hedy Lamarr e grandes nomes que mudaram o mundo.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎮</div>
+                    <h3>Modos de Visita</h3>
+                    <p>Passeio automático guiado, céu estrelado interativo e integração com óculos de Realidade Virtual.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CRÉDITOS ===== -->
+        <section class="credits-section">
+            <h2 class="section-title">Desenvolvedores &amp; Créditos</h2>
+            <div class="credits-grid">
+                <div class="credit-card"><div class="credit-avatar">D</div><div class="credit-info"><h4>Diego</h4><p>Desenvolvimento WEB</p></div></div>
+                <div class="credit-card"><div class="credit-avatar">D</div><div class="credit-info"><h4>Diogo</h4><p>Mascote</p></div></div>
+                <div class="credit-card"><div class="credit-avatar">E</div><div class="credit-info"><h4>Eduardo</h4><p>Desenvolvimento Jogo</p></div></div>
+                <div class="credit-card"><div class="credit-avatar">R</div><div class="credit-info"><h4>Rodrigo</h4><p>Desenvolvimento Jogo</p></div></div>
+                <div class="credit-card"><div class="credit-avatar">A</div><div class="credit-info"><h4>Alexandre</h4><p>Jogador de Vôlei</p></div></div>
+                <div class="credit-card"><div class="credit-avatar">L</div><div class="credit-info"><h4>Lucas</h4><p>Tucano</p></div></div>
+                <div class="credit-card featured-credit">
+                    <div class="credit-avatar">K</div>
+                    <div class="credit-info">
+                        <h4>Karlos André H. de Moraes</h4>
+                        <p>Repositor do BH</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer>
+            <p>&copy; Dia D da Tecnologia — Museu Virtual "Mulheres na Ciência"</p>
+            <p>Projeto Acadêmico &amp; Interativo em Web 3D</p>
+        </footer>
+
     </div>
-
-    <div class="sketch-card">
-      <span class="doodle-star">⚛️</span>
-      <span class="card-tag" style="background: #e8f5e9;">Jogo #02</span>
-      <h2>Velha Científica</h2>
-      <p>Um duelo entre Marie Curie e Ada Lovelace para ver quem domina o tabuleiro primeiro!</p>
-    </div>
-
-    <div class="sketch-card">
-      <span class="doodle-star">📡</span>
-      <span class="card-tag" style="background: #f3e5f5;">Jogo #03</span>
-      <h2>Batalha Naval</h2>
-      <p>Localize os laboratórios secretos no radar e revele as conquistas de grandes mulheres.</p>
-    </div>
-
-  </main>
-
-  <button class="btn-sketch" onclick="alert('Iniciando o evento!')">Explorar os Jogos!</button>
+    <!-- fim .container -->
 
 </body>
 </html>
