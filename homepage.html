@@ -1,498 +1,411 @@
-<html lang="pt-BR"><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mulheres na Ciência · Museu Construtivista</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home · Mini Games · Mulheres na Ciência</title>
 
-    <!-- Bootstrap 5 + Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap 5 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Fonte Bebas Neue + IBM Plex Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        /* ── IDENTIDADE CONSTRUTIVISTA (CSS MÍNIMO) ── */
+        /* ============================================================
+               CONSTRUCTIVIST CUSTOM STYLES
+               ============================================================ */
         :root {
-            --red: #e01e37;
-            --yellow: #f4c430;
-            --black: #0b0b0b;
-            --white: #f0f0f0;
-            --gray: #8a8a8a;
+            --red: #E53935;
+            --red-dark: #B71C1C;
+            --yellow: #FFC107;
+            --yellow-light: #FFD54F;
+            --black: #121212;
+            --black-light: #1E1E1E;
+            --white: #F5F5F5;
+            --gray: #8C8C8C;
         }
 
         body {
-            background-color: var(--black);
+            background: var(--black);
             color: var(--white);
-            font-family: 'Inter', sans-serif;
+            font-family: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
             overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Canvas geométrico de fundo */
-        #geo-canvas {
+        /* --- fundo com linhas diagonais --- */
+        body::before {
+            content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 0;
             pointer-events: none;
-            opacity: 0.35;
+            background:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(229, 57, 53, 0.06) 40px,
+                    rgba(229, 57, 53, 0.06) 41px),
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 193, 7, 0.04) 40px,
+                    rgba(255, 193, 7, 0.04) 41px),
+                radial-gradient(ellipse at 20% 10%, rgba(229, 57, 53, 0.10), transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(255, 193, 7, 0.07), transparent 50%);
         }
 
-        .overlay {
+        /* --- formas geométricas flutuantes (construtivistas) --- */
+        .geo-shape {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 40%, rgba(11, 11, 11, 0.2) 0%, rgba(11, 11, 11, 0.85) 100%);
-            z-index: 1;
             pointer-events: none;
+            z-index: 0;
+            opacity: 0.12;
         }
-
-        .container {
-            position: relative;
-            z-index: 2;
+        .geo-shape--rect {
+            width: 140px;
+            height: 90px;
+            background: var(--red);
+            top: 6%;
+            right: 2%;
+            transform: rotate(15deg);
         }
-
-        /* Recortes angulares (clip-path) */
-        .clip-angle {
-            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+        .geo-shape--circle {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 5px solid var(--yellow);
+            bottom: -40px;
+            left: -80px;
         }
-        .clip-angle-left {
-            clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 0% 100%);
+        .geo-shape--triangle {
+            width: 0;
+            height: 0;
+            border-left: 80px solid transparent;
+            border-right: 80px solid transparent;
+            border-bottom: 130px solid var(--red-dark);
+            top: 55%;
+            right: 0%;
+            transform: rotate(20deg);
+            opacity: 0.08;
         }
-        .clip-angle-right {
-            clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);
-        }
-        .clip-triangle {
-            clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%);
-        }
-
-        /* Cores e bordas */
-        .bg-red {
-            background-color: var(--red) !important;
-        }
-        .bg-yellow {
-            background-color: var(--yellow) !important;
-        }
-        .text-yellow {
-            color: var(--yellow) !important;
-        }
-        .border-red {
-            border-color: var(--red) !important;
-        }
-        .border-yellow {
-            border-color: var(--yellow) !important;
-        }
-
-        .badge-status {
-            background-color: var(--red);
-            color: var(--white);
-            padding: 0.5rem 1.5rem;
-            clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
-        }
-
-        .btn-enter {
-            background-color: var(--yellow);
-            color: var(--black);
-            font-weight: 700;
-            padding: 0.8rem 2.5rem;
-            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
-            transition: all 0.25s ease;
-            border: none;
-            box-shadow: 8px 8px 0 var(--red);
-        }
-        .btn-enter:hover {
-            transform: translate(-4px, -4px);
-            box-shadow: 12px 12px 0 var(--red);
-            background-color: var(--white);
-            color: var(--black);
-        }
-
-        .card-feature {
-            background-color: var(--black);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
-            transition: all 0.3s ease;
-        }
-        .card-feature:hover {
-            border-color: var(--yellow);
-            transform: translateY(-6px);
-            box-shadow: 12px 12px 0 rgba(224, 30, 55, 0.25);
-        }
-        .card-feature .icon-box {
-            width: 56px;
-            height: 56px;
-            background-color: var(--red);
-            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: var(--white);
-        }
-
-        .credit-card {
-            background-color: #1c1c1c;
-            border-left: 4px solid var(--red);
-            clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
-            transition: all 0.2s ease;
-        }
-        .credit-card:hover {
-            border-left-color: var(--yellow);
-            background-color: var(--black);
-        }
-        .credit-card .avatar {
-            width: 44px;
-            height: 44px;
-            background-color: var(--red);
-            clip-path: polygon(0% 0%, 100% 0%, 75% 100%, 0% 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-        .credit-card.featured {
-            border-left-color: var(--yellow);
-            background-color: rgba(224, 30, 55, 0.08);
-        }
-        .credit-card.featured .avatar {
-            background-color: var(--yellow);
-            color: var(--black);
-        }
-
-        .section-divider {
-            border-top: 3px solid var(--red);
-            position: relative;
-        }
-        .section-divider::after {
-            content: '';
-            position: absolute;
-            top: -3px;
-            left: 30%;
-            width: 25%;
-            height: 3px;
+        .geo-shape--line {
+            position: fixed;
+            width: 200%;
+            height: 2px;
             background: var(--yellow);
+            opacity: 0.06;
+            transform: rotate(-18deg);
+            top: 30%;
+            left: -30%;
+            z-index: 0;
         }
 
-        .footer-small {
-            color: #555;
-            font-size: 0.7rem;
+        /* --- container principal --- */
+        .home-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 960px;
         }
 
-        /* Ajustes responsivos pontuais */
-        @media (max-width: 768px) {
-            .btn-enter {
-                width: 100%;
-                justify-content: center;
+        /* --- card principal --- */
+        .home-card {
+            background: rgba(18, 18, 18, 0.92);
+            backdrop-filter: blur(4px);
+            border: 3px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0;
+            padding: 28px 24px 32px;
+            box-shadow: 14px 14px 0 rgba(229, 57, 53, 0.18);
+            transition: box-shadow 0.2s;
+        }
+        .home-card:hover {
+            box-shadow: 18px 18px 0 rgba(229, 57, 53, 0.25);
+        }
+
+        /* --- botão voltar (home) --- */
+        .btn-home {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 8px 24px;
+            background: transparent;
+            border: 3px solid var(--gray);
+            color: var(--gray);
+            border-radius: 0;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-home:hover {
+            border-color: var(--yellow);
+            color: var(--yellow);
+            background: rgba(255, 193, 7, 0.06);
+        }
+
+        /* --- cabeçalho --- */
+        .header-construct {
+            border-left: 8px solid var(--red);
+            padding-left: 18px;
+            margin-bottom: 28px;
+        }
+        .header-construct .eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin-bottom: 2px;
+        }
+        .header-construct h1 {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(32px, 5vw, 48px);
+            text-transform: uppercase;
+            color: var(--white);
+            letter-spacing: 0.04em;
+            line-height: 1.05;
+            margin: 0;
+            text-shadow: 4px 4px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.5);
+        }
+        .header-construct h1 .highlight {
+            color: var(--yellow);
+        }
+        .header-construct .sub {
+            font-size: 14px;
+            color: var(--gray);
+            border-left: 3px solid var(--yellow);
+            padding-left: 14px;
+            margin-top: 6px;
+        }
+
+        /* --- seções de jogos --- */
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 26px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--white);
+            border-bottom: 4px solid var(--red);
+            padding-bottom: 6px;
+            margin-bottom: 18px;
+        }
+        .section-title .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            background: var(--yellow);
+            color: var(--black);
+            padding: 2px 12px;
+            margin-left: 10px;
+            letter-spacing: 0.04em;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .game-btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 18px 12px;
+            background: var(--black-light);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0;
+            color: var(--white);
+            transition: all 0.15s ease;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .game-btn:hover {
+            background: #2A2A2A;
+            border-color: var(--yellow);
+            transform: scale(1.03) translateY(-2px);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.08);
+        }
+        .game-btn .icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+        .game-btn .label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .game-btn .sub-label {
+            font-size: 11px;
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        /* --- botão multiplayer destaque --- */
+        .game-btn.multiplayer {
+            border-color: rgba(255, 193, 7, 0.2);
+        }
+        .game-btn.multiplayer:hover {
+            border-color: var(--yellow);
+        }
+
+        /* --- rodapé --- */
+        .footer-construct {
+            margin-top: 24px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gray);
+            text-align: center;
+            border-top: 2px solid rgba(255, 255, 255, 0.04);
+            padding-top: 16px;
+        }
+
+        /* --- animação de entrada (opcional) --- */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            .hero-title {
-                font-size: 3rem !important;
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .home-card {
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+
+        /* --- responsivo --- */
+        @media (max-width: 576px) {
+            .home-card {
+                padding: 18px 14px;
+                box-shadow: 8px 8px 0 rgba(229, 57, 53, 0.15);
+            }
+            .header-construct h1 {
+                text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0, 0, 0, 0.5);
+            }
+            .game-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .game-btn {
+                padding: 14px 10px;
+                font-size: 14px;
+            }
+            .game-btn .icon {
+                font-size: 22px;
+            }
+            .section-title {
+                font-size: 22px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas geométrico animado -->
-    <canvas id="geo-canvas" width="962" height="765"></canvas>
-    <div class="overlay"></div>
+    <!-- ===== FORMAS GEOMÉTRICAS ===== -->
+    <div class="geo-shape geo-shape--rect"></div>
+    <div class="geo-shape geo-shape--circle"></div>
+    <div class="geo-shape geo-shape--triangle"></div>
+    <div class="geo-shape--line"></div>
 
-    <div class="container">
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <div class="home-wrapper">
 
-        <!-- HEADER -->
-        <header class="d-flex flex-wrap justify-content-between align-items-center py-3 border-bottom border-red position-relative">
+        <div class="home-card">
+
+            <!-- BOTÃO VOLTAR (HOME) - na própria home, pode ser um link para um índice ou para a mesma página -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="/homepage.html" class="btn-home">← Voltar para Home</a>
+                <div style="width: 1px; height: 1px;"></div>
+            </div>
+
+            <!-- CABEÇALHO -->
+            <div class="header-construct">
+                <div class="eyebrow">Dia D · Tecnologia — Feira de Ciências</div>
+                <h1>Mini Games · <span class="highlight">Pioneiras</span></h1>
+                <div class="sub">Escolha seu modo de jogo e desafie seus conhecimentos sobre as mulheres que mudaram a ciência.</div>
+            </div>
+
+            <!-- ===== SEÇÃO SINGLE PLAYER ===== -->
             <div>
-                <p class="text-yellow text-uppercase fw-bold mb-0" style="font-size:0.8rem; letter-spacing:4px;">
-                    Dia D · Tecnologia
-                </p>
-                <h1 class="display-6 fw-bold text-white mb-0" style="font-family:'Bebas Neue',sans-serif; letter-spacing:2px;">
-                    Museu Construtivista
-                </h1>
-            </div>
-            <div class="badge-status d-flex align-items-center gap-2">
-                <span class="d-inline-block rounded-circle bg-yellow" style="width:10px;height:10px; animation:pulse-dot 1.4s infinite alternate;"></span>
-                Exposição 3D · Vanguarda
-            </div>
-        </header>
-
-        <!-- HERO -->
-        <section class="py-5 position-relative">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <p class="text-yellow text-uppercase fw-bold mb-2" style="letter-spacing:6px; font-size:0.9rem;">
-                        Dia D da Tecnologia
-                    </p>
-                    <h1 class="display-1 fw-bold text-white lh-1" style="font-family:'Bebas Neue',sans-serif; text-shadow:6px 6px 0 var(--red), 10px 10px 0 rgba(0,0,0,0.6);">
-                        Mulheres <br><span class="text-yellow" style="text-shadow:6px 6px 0 var(--red), 10px 10px 0 rgba(0,0,0,0.6);">na Ciência</span>
-                    </h1>
-                    <p class="lead text-secondary mt-3 border-start border-4 border-yellow ps-4 py-2 bg-black bg-opacity-50 clip-angle" style="max-width:600px; font-weight:400;">
-                        Geometria, contraste e velocidade — uma experiência imersiva dedicada às
-                        pioneiras que redefiniram a física, a matemática e a tecnologia.
-                        Navegue por um museu virtual com estética construtivista.
-                    </p>
-
-                    <div class="d-flex flex-wrap gap-3 align-items-center mt-4">
-                        <a href="museu.html" class="btn btn-enter d-inline-flex align-items-center gap-2">
-                            <span>Entrar no Museu</span>
-                            <i class="bi bi-arrow-right-circle fs-4"></i>
-                        </a>
-                        <div class="d-flex flex-wrap gap-3 text-secondary small text-uppercase bg-black bg-opacity-25 px-3 py-2 clip-angle">
-                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">WASD</span> andar</span>
-                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">Mouse</span> olhar</span>
-                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">Clique</span> vitrines</span>
-                            <span><span class="badge bg-dark text-yellow border border-yellow border-opacity-25 px-2">VR</span> suportado</span>
-                        </div>
-                    </div>
+                <div class="section-title">
+                    🎯 Single Player
+                    <span class="badge">1 jogador</span>
+                </div>
+                <div class="game-grid">
+                    <a href="/quiz.html" class="game-btn">
+                        <span class="icon">🧪</span>
+                        <span class="label">Quiz</span>
+                        <span class="sub-label">5 perguntas aleatórias</span>
+                    </a>
+                    <a href="/campo-minado.html" class="game-btn">
+                        <span class="icon">💣</span>
+                        <span class="label">Campo Minado</span>
+                        <span class="sub-label">Desvende as cientistas</span>
+                    </a>
+                    <a href="/memoria.html" class="game-btn">
+                        <span class="icon">🃏</span>
+                        <span class="label">Jogo da Memória</span>
+                        <span class="sub-label">Encontre os pares</span>
+                    </a>
+                    <a href="/caca-palavras.html" class="game-btn">
+                        <span class="icon">🔍</span>
+                        <span class="label">Caça-Palavras</span>
+                        <span class="sub-label">Encontre os nomes</span>
+                    </a>
                 </div>
             </div>
-        </section>
 
-        <!-- FEATURES -->
-        <section class="py-4">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">A experiência</h2>
-                <hr class="flex-grow-1 border-red border-3" style="clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);">
+            <!-- ===== SEÇÃO MULTIPLAYER (2 JOGADORES) ===== -->
+            <div>
+                <div class="section-title">
+                    👥 Multiplayer
+                    <span class="badge">2 jogadores</span>
+                </div>
+                <div class="game-grid">
+                    <a href="/quiz-duelo.html" class="game-btn multiplayer">
+                        <span class="icon">⚔️</span>
+                        <span class="label">Duelo de Quiz</span>
+                        <span class="sub-label">Quem sabe mais?</span>
+                    </a>
+                    <a href="/forca-dupla.html" class="game-btn multiplayer">
+                        <span class="icon">🧩</span>
+                        <span class="label">Forca Dupla</span>
+                        <span class="sub-label">Um ajuda o outro</span>
+                    </a>
+                    <a href="/corrida-espacial.html" class="game-btn multiplayer">
+                        <span class="icon">🚀</span>
+                        <span class="label">Corrida Espacial</span>
+                        <span class="sub-label">Responda e avance</span>
+                    </a>
+                    <a href="/batalha-cientistas.html" class="game-btn multiplayer">
+                        <span class="icon">🏛️</span>
+                        <span class="label">Batalha de Cientistas</span>
+                        <span class="sub-label">Turnos alternados</span>
+                    </a>
+                </div>
             </div>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                <div class="col">
-                    <div class="card-feature h-100 p-4">
-                        <div class="icon-box mb-3">
-                            <i class="bi bi-grid-3x3-gap-fill fs-2"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Ambiente 3D</h3>
-                        <p class="text-secondary">Pavilhão arquitetônico modelado com iluminação dinâmica e atmosfera futurista, inspirado no construtivismo russo.</p>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card-feature h-100 p-4">
-                        <div class="icon-box mb-3">
-                            <i class="bi bi-person-arms-up fs-2"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Pioneiras</h3>
-                        <p class="text-secondary">Ada Lovelace, Marie Curie, Hedy Lamarr e tantas outras que transformaram a ciência com suas descobertas.</p>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card-feature h-100 p-4">
-                        <div class="icon-box mb-3">
-                            <i class="bi bi-vr fs-2"></i>
-                        </div>
-                        <h3 class="h4 fw-bold text-white" style="font-family:'Bebas Neue',sans-serif;">Modos de Visita</h3>
-                        <p class="text-secondary">Passeio guiado automático, céu estrelado interativo e compatibilidade com óculos de Realidade Virtual (VR).</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <!-- FOOTER -->
+            <div class="footer-construct">feito para o Dia D de Tecnologia · tema: mulheres na ciência</div>
 
-        <!-- CREDITS -->
-        <section class="py-4 mt-3 section-divider">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">Equipe &amp; Créditos</h2>
-                <hr class="flex-grow-1 border-red border-3" style="clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);">
-            </div>
-
-            <div class="row row-cols-2 row-cols-md-3 g-3">
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">D</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Diego</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento WEB</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">D</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Diogo</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Mascote</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">E</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Eduardo</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento Jogo</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">R</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Rodrigo</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Desenvolvimento Jogo</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">A</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Alexandre</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Jogador de Vôlei</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="credit-card d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">L</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Lucas</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Tucano</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 mx-auto">
-                    <div class="credit-card featured d-flex align-items-center gap-3 p-3">
-                        <div class="avatar">K</div>
-                        <div>
-                            <h4 class="h6 fw-bold text-white m-0">Karlos André H. de Moraes</h4>
-                            <p class="small text-secondary m-0 text-uppercase">Repositor do BH</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FOOTER -->
-        <footer class="py-4 text-center text-secondary border-top border-secondary border-opacity-10">
-            <p class="m-0 small text-uppercase">© Dia D da Tecnologia — Museu Virtual "Mulheres na Ciência"</p>
-            <p class="footer-small m-0">Projeto Acadêmico &amp; Interativo em Web 3D · Estética Construtivista</p>
-        </footer>
-
+        </div>
     </div>
 
-    <!-- Bootstrap JS (opcional, para toggles etc.) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-    </script>
-
-    <!-- Canvas geométrico animado -->
-    <script>
-        (function() {
-            const canvas = document.getElementById('geo-canvas');
-            const ctx = canvas.getContext('2d');
-            let w, h;
-            const shapes = [];
-            const colors = ['#e01e37', '#f4c430', '#ffffff', '#0b0b0b'];
-
-            function resize() {
-                w = canvas.width = window.innerWidth;
-                h = canvas.height = window.innerHeight;
-            }
-
-            function random(min, max) { return Math.random() * (max - min) + min; }
-
-            function initShapes(count = 28) {
-                shapes.length = 0;
-                for (let i = 0; i < count; i++) {
-                    const type = Math.floor(Math.random() * 3);
-                    const color = colors[Math.floor(Math.random() * colors.length)];
-                    shapes.push({
-                        type,
-                        x: random(0, w),
-                        y: random(0, h),
-                        size: random(20, 120),
-                        size2: random(20, 80),
-                        angle: random(0, Math.PI * 2),
-                        speedRot: random(-0.02, 0.02),
-                        speedX: random(-0.3, 0.3),
-                        speedY: random(-0.3, 0.3),
-                        color,
-                        alpha: random(0.15, 0.6),
-                    });
-                }
-            }
-
-            function drawShape(s) {
-                ctx.save();
-                ctx.translate(s.x, s.y);
-                ctx.rotate(s.angle);
-                ctx.globalAlpha = s.alpha;
-                ctx.fillStyle = s.color;
-                ctx.strokeStyle = s.color;
-
-                if (s.type === 0) {
-                    const w2 = s.size,
-                        h2 = s.size * 0.7;
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(w2, 0);
-                    ctx.lineTo(w2 * 0.85, h2);
-                    ctx.lineTo(0, h2);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                } else if (s.type === 1) {
-                    const s2 = s.size;
-                    ctx.beginPath();
-                    ctx.moveTo(0, -s2 / 2);
-                    ctx.lineTo(s2 / 2, s2 / 2);
-                    ctx.lineTo(-s2 / 2, s2 / 2);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                } else {
-                    const len = s.size;
-                    ctx.beginPath();
-                    ctx.moveTo(-len / 2, -len / 4);
-                    ctx.lineTo(len / 2, len / 4);
-                    ctx.strokeStyle = s.color;
-                    ctx.lineWidth = random(4, 14);
-                    ctx.globalAlpha = s.alpha * 0.9;
-                    ctx.stroke();
-                }
-                ctx.restore();
-            }
-
-            function updateShapes() {
-                for (const s of shapes) {
-                    s.x += s.speedX;
-                    s.y += s.speedY;
-                    s.angle += s.speedRot;
-                    if (s.x < -100 || s.x > w + 100) s.speedX *= -1;
-                    if (s.y < -100 || s.y > h + 100) s.speedY *= -1;
-                    s.alpha += random(-0.005, 0.005);
-                    s.alpha = Math.min(0.7, Math.max(0.1, s.alpha));
-                }
-            }
-
-            function draw() {
-                ctx.clearRect(0, 0, w, h);
-                for (const s of shapes) drawShape(s);
-                updateShapes();
-                requestAnimationFrame(draw);
-            }
-
-            window.addEventListener('resize', () => { resize();
-                initShapes(32); });
-            resize();
-            initShapes(32);
-            draw();
-        })();
-    </script>
-
-    <style>
-        /* Animações extras (pulse) */
-        @keyframes pulse-dot {
-            0% {
-                opacity: 0.3;
-                transform: scale(0.9);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-        }
-    </style>
-
-
-</body></html>
+</body>
+</html>
