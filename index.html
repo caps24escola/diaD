@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini Games Educacionais · Interativo</title>
+    <title>Mini Games · Mulheres na Ciência</title>
 
     <!-- Bootstrap 5 + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -106,7 +106,30 @@
             color: var(--black);
         }
 
-        /* ── NOVO ESTILO PARA O TEXTO METODOLÓGICO ── */
+        .card-feature {
+            background-color: var(--black);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            clip-path: polygon(0% 0%, 100% 0%, 96% 100%, 4% 100%);
+            transition: all 0.3s ease;
+        }
+        .card-feature:hover {
+            border-color: var(--yellow);
+            transform: translateY(-6px);
+            box-shadow: 12px 12px 0 rgba(224, 30, 55, 0.25);
+        }
+        .card-feature .icon-box {
+            width: 56px;
+            height: 56px;
+            background-color: var(--red);
+            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--white);
+        }
+
+        /* ── METODOLOGIA ── */
         .method-box {
             background-color: rgba(11, 11, 11, 0.7);
             border-left: 6px solid var(--yellow);
@@ -224,7 +247,7 @@
             </div>
             <div class="badge-status d-flex align-items-center gap-2">
                 <span class="d-inline-block rounded-circle bg-yellow" style="width:10px;height:10px; animation:pulse-dot 1.4s infinite alternate;"></span>
-                Metodologia Ativa · Aprendizado
+                Metodologia Ativa · Pioneiras
             </div>
         </header>
 
@@ -259,7 +282,69 @@
             </div>
         </section>
 
-        <!-- NOVA SEÇÃO: TEXTO SOBRE A METODOLOGIA (substitui os cards de jogos) -->
+        <!-- NOVA SEÇÃO: MULHERES NA CIÊNCIA (Inspiração) -->
+        <section class="py-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">
+                    <i class="bi bi-stars text-yellow me-2"></i> Inspiração: Mulheres na Ciência
+                </h2>
+                <hr class="flex-grow-1 border-red border-3" style="clip-path:polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);">
+            </div>
+            <p class="text-secondary lead mb-4">
+                Os mini games educacionais celebram e são inspirados pelas trajetórias de mulheres que transformaram a ciência, a matemática e a tecnologia. Conheça algumas delas:
+            </p>
+
+            <div class="row row-cols-1 row-cols-md-4 g-4">
+                <div class="col">
+                    <div class="card-feature h-100 p-3 text-center">
+                        <div class="icon-box mx-auto mb-2" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <h4 class="h5 fw-bold text-white">Ada Lovelace</h4>
+                        <p class="text-yellow small text-uppercase">Matemática · Programação</p>
+                        <p class="text-secondary small">Criadora do primeiro algoritmo da história. Inspira nossos jogos de lógica e raciocínio.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-feature h-100 p-3 text-center">
+                        <div class="icon-box mx-auto mb-2" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                            <i class="bi bi-flask"></i>
+                        </div>
+                        <h4 class="h5 fw-bold text-white">Marie Curie</h4>
+                        <p class="text-yellow small text-uppercase">Física · Química</p>
+                        <p class="text-secondary small">Primeira pessoa a ganhar dois Prêmios Nobel. Tema dos nossos desafios científicos.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-feature h-100 p-3 text-center">
+                        <div class="icon-box mx-auto mb-2" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                            <i class="bi bi-wifi"></i>
+                        </div>
+                        <h4 class="h5 fw-bold text-white">Hedy Lamarr</h4>
+                        <p class="text-yellow small text-uppercase">Tecnologia · Comunicação</p>
+                        <p class="text-secondary small">Inventou a base do Wi-Fi e Bluetooth. Celebrando a criatividade tecnológica.</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card-feature h-100 p-3 text-center">
+                        <div class="icon-box mx-auto mb-2" style="width: 70px; height: 70px; font-size: 2.2rem;">
+                            <i class="bi bi-rocket"></i>
+                        </div>
+                        <h4 class="h5 fw-bold text-white">Katherine Johnson</h4>
+                        <p class="text-yellow small text-uppercase">Matemática · NASA</p>
+                        <p class="text-secondary small">Cálculos cruciais para as missões espaciais. Referência em nossos jogos de exatas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <span class="badge bg-yellow text-black px-4 py-2" style="clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%); font-size: 0.9rem;">
+                    <i class="bi bi-star-fill me-2"></i> Jogue e aprenda sobre essas pioneiras
+                </span>
+            </div>
+        </section>
+
+        <!-- SEÇÃO: METODOLOGIA (Por que é mais fácil) -->
         <section class="py-4">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <h2 class="display-5 fw-bold text-white m-0" style="font-family:'Bebas Neue',sans-serif;">Por que esse método é mais fácil?</h2>
@@ -407,7 +492,7 @@
 
         <!-- FOOTER -->
         <footer class="py-4 text-center text-secondary border-top border-secondary border-opacity-10">
-            <p class="m-0 small text-uppercase">© Mini Games Educacionais — Aprenda se divertindo</p>
+            <p class="m-0 small text-uppercase">© Mini Games Educacionais — Inspirado nas Mulheres na Ciência</p>
             <p class="footer-small m-0">Projeto Acadêmico Interativo · Estética Construtivista</p>
         </footer>
 
