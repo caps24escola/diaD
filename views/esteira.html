@@ -1,1 +1,461 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIA D // TRIAGEM CIENTÍFICA ADAPTATIVA</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --c-red: #ff1e27;
+      --c-yellow: #ffcc00;
+      --c-black: #0d0d0d;
+      --c-white: #ffffff;
+      --c-blue: #00e5ff;
+      --c-green: #00ff66;
+    }
+
+    body {
+      background-color: var(--c-black);
+      color: var(--c-white);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Estilo Construtivista */
+    .header-banner {
+      background-color: var(--c-red);
+      color: var(--c-white);
+      border-bottom: 6px solid var(--c-white);
+      box-shadow: 0px 8px 0px var(--c-yellow);
+      transform: skewY(-1deg);
+    }
+
+    .constructivist-card {
+      background-color: #141414;
+      border: 4px solid var(--c-white);
+      border-radius: 0 !important;
+      box-shadow: 10px 10px 0px var(--c-red);
+      position: relative;
+    }
+
+    /* Esteira Rolante */
+    .conveyor-belt {
+      height: 180px;
+      background: repeating-linear-gradient(
+        90deg,
+        #1a1a1a,
+        #1a1a1a 30px,
+        #2a2a2a 30px,
+        #2a2a2a 60px
+      );
+      border: 5px solid var(--c-white);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px #000;
+    }
+
+    .conveyor-belt::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, rgba(255,30,39,0.3) 0%, transparent 20%, transparent 80%, rgba(255,204,0,0.3) 100%);
+      pointer-events: none;
+    }
+
+    /* Item da Esteira */
+    .belt-item {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--c-white);
+      color: var(--c-black);
+      padding: 10px 20px;
+      min-width: 160px;
+      z-index: 5;
+      transition: border-color 0.1s, box-shadow 0.1s;
+    }
+
+    /* Bordas dinâmicas por categoria */
+    .border-recycle {
+      border: 5px solid var(--c-green) !important;
+      box-shadow: 6px 6px 0px var(--c-green) !important;
+    }
+
+    .border-burn {
+      border: 5px solid var(--c-red) !important;
+      box-shadow: 6px 6px 0px var(--c-red) !important;
+    }
+
+    .item-icon {
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .item-name {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.4rem;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    /* Botões de Ação */
+    .btn-action {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2rem;
+      border: 4px solid var(--c-white);
+      border-radius: 0;
+      padding: 15px;
+      transition: all 0.1s ease;
+      width: 100%;
+    }
+
+    .btn-recycle {
+      background-color: var(--c-green);
+      color: var(--c-black);
+      box-shadow: 6px 6px 0px var(--c-white);
+    }
+
+    .btn-burn {
+      background-color: var(--c-red);
+      color: var(--c-white);
+      box-shadow: 6px 6px 0px var(--c-yellow);
+    }
+
+    .btn-constructivist {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2rem;
+      background-color: var(--c-yellow);
+      color: var(--c-black);
+      border: 4px solid var(--c-white);
+      border-radius: 0;
+      box-shadow: 8px 8px 0px var(--c-red);
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.1s ease;
+    }
+    
+    .btn-constructivist:hover {
+      background-color: var(--c-white);
+      color: var(--c-black);
+      transform: translate(-3px, -3px);
+      box-shadow: 11px 11px 0px var(--c-red);
+    }
+
+    .stat-badge {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.5rem;
+      background-color: var(--c-white);
+      color: var(--c-black);
+      padding: 5px 15px;
+      border: 3px solid var(--c-black);
+      box-shadow: 4px 4px 0px var(--c-red);
+    }
+
+    .fact-banner {
+      background-color: var(--c-yellow);
+      color: var(--c-black);
+      border: 3px solid var(--c-white);
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(13, 13, 13, 0.96);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 6px solid var(--c-white);
+    }
+
+    .shake {
+      animation: errorShake 0.2s ease-in-out;
+    }
+
+    @keyframes errorShake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-15px); }
+      75% { transform: translateX(15px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container mt-4 mb-2">
+    <a href="/games.html" class="btn-constructivist px-4 py-1" style="font-size: 1.5rem;">
+      &#9664; VOLTAR
+    </a>
+  </div>
+
+  <header class="header-banner py-2 text-center mb-3">
+    <h1 class="display-4 fw-bold m-0">ESTEIRA ADAPTATIVA // MULHERES NA CIÊNCIA</h1>
+    <p class="m-0 text-uppercase fw-bold text-dark">Gestão Inteligente do Laboratório de Materiais</p>
+  </header>
+
+  <main class="container my-auto position-relative">
+    
+    <div id="overlay">
+      <h2 id="winner-text" class="display-3 fw-bold text-warning mb-2 text-center">TRIAGEM CIENTÍFICA</h2>
+      <p class="fs-5 text-light mb-3 text-center px-4" style="max-width: 700px;">
+        Inspiração: <strong>Stephanie Kwolek</strong> (Inventora do Kevlar)!<br>
+        A velocidade da esteira se adapta ao seu ritmo e tempo de resposta.<br><br>
+        Aperte <strong style="color: var(--c-green);">[ F ]</strong> para <strong style="color: var(--c-green);">RECICLAR (BORDA VERDE)</strong>.<br>
+        Aperte <strong class="text-danger">[ J ]</strong> para <strong>QUEIMAR / DESCARTE (BORDA VERMELHA)</strong>.<br>
+        <span class="text-warning fw-bold">LIMITE: MÁXIMO DE 7 ERROS!</span>
+      </p>
+      <button class="btn btn-constructivist px-5 py-2" onclick="startGame()">INICIAR MOTORES</button>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-12">
+        <div class="constructivist-card p-4" id="main-card">
+          
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div class="stat-badge">PONTOS: <span id="score-display">0</span></div>
+            <div class="stat-badge bg-info text-dark">RITMO: <span id="speed-display">1.0x</span></div>
+            <div class="stat-badge bg-warning">TEMPO: <span id="time-display">14</span>s</div>
+            <div class="stat-badge bg-danger text-white">ERROS: <span id="errors-display">0</span> / 7</div>
+          </div>
+
+          <div class="conveyor-belt mb-4" id="belt">
+            <div id="active-item" class="belt-item border-burn" style="left: 53.9%;">
+              <span class="item-icon" id="item-icon">☣️</span>
+              <span class="item-name" id="item-name">Elemento Tóxico</span>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6 col-12">
+              <button class="btn btn-action btn-recycle" onclick="handleInput('F')">
+                [ F ] RECICLAR (VERDE)
+              </button>
+            </div>
+            <div class="col-md-6 col-12">
+              <button class="btn btn-action btn-burn" onclick="handleInput('J')">
+                [ J ] QUEIMAR (VERMELHO)
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="fact-banner text-center text-uppercase">
+          <span>💡 HISTÓRIA: Stephanie Kwolek inventou o Kevlar em 1965. Sua descoberta deu origem a coletes à prova de balas e proteções térmicas para foguetes!</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="text-center py-2 text-secondary text-uppercase fs-7 mt-3">
+    PROJETO ACADÊMICO // ESTILO CONSTRUTIVISTA // DIA D DA TECNOLOGIA
+  </footer>
+
+  <script>
+    const ITEMS_DATABASE = [
+      // Para RECICLAR (F)
+      { name: "Placa de Circuito", icon: "🛰️", action: "F" },
+      { name: "Papel de Algoritmo", icon: "📜", action: "F" },
+      { name: "Fibra de Kevlar", icon: "🛡️", action: "F" },
+      { name: "Polímero Reciclável", icon: "🧪", action: "F" },
+      { name: "Telescópio Quebrado", icon: "🔭", action: "F" },
+      
+      // Para QUEIMAR / DESCARTE (J)
+      { name: "Elemento Tóxico", icon: "☣️", action: "J" },
+      { name: "Casca de Banana", icon: "🍌", action: "J" },
+      { name: "Lâmpada Fundida", icon: "💡", action: "J" },
+      { name: "Óleo Usado", icon: "🛢️", action: "J" },
+      { name: "Sucata Oxidada", icon: "⚙️", action: "J" }
+    ];
+
+    const MAX_ERRORS = 7;
+    const GAME_DURATION = 60;
+    const BASE_SPEED = 0.1;
+
+    let score = 0;
+    let errors = 0;
+    let timeLeft = GAME_DURATION;
+    let currentItem = null;
+    let itemPos = 100;
+    let currentSpeed = BASE_SPEED;
+    let comboStreak = 0;
+    let gameActive = false;
+    let gameLoop;
+    let timerLoop;
+
+    // DOM Elements
+    const itemElem = document.getElementById('active-item');
+    const iconElem = document.getElementById('item-icon');
+    const nameElem = document.getElementById('item-name');
+    const scoreDisplay = document.getElementById('score-display');
+    const speedDisplay = document.getElementById('speed-display');
+    const timeDisplay = document.getElementById('time-display');
+    const errorsDisplay = document.getElementById('errors-display');
+    const overlay = document.getElementById('overlay');
+    const winnerText = document.getElementById('winner-text');
+    const mainCard = document.getElementById('main-card');
+
+    function spawnNextItem() {
+      if (!gameActive) return;
+
+      const randomIndex = Math.floor(Math.random() * ITEMS_DATABASE.length);
+      currentItem = ITEMS_DATABASE[randomIndex];
+      
+      iconElem.innerText = currentItem.icon;
+      nameElem.innerText = currentItem.name;
+      
+      itemElem.classList.remove('border-recycle', 'border-burn');
+      if (currentItem.action === 'F') {
+        itemElem.classList.add('border-recycle');
+      } else {
+        itemElem.classList.add('border-burn');
+      }
+
+      itemPos = 100;
+      itemElem.style.left = itemPos + '%';
+    }
+
+    function startGame() {
+      score = 0;
+      errors = 0;
+      comboStreak = 0;
+      timeLeft = GAME_DURATION;
+      currentSpeed = BASE_SPEED;
+      gameActive = true;
+
+      updateStatusUI();
+
+      overlay.style.display = 'none';
+      spawnNextItem();
+
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(() => {
+        if (!gameActive) return;
+
+        itemPos -= currentSpeed;
+        itemElem.style.left = itemPos + '%';
+
+        if (itemPos <= -20) {
+          const isGameOver = registerError();
+          if (!isGameOver) {
+            spawnNextItem();
+          }
+        }
+      }, 30);
+
+      if (timerLoop) clearInterval(timerLoop);
+      timerLoop = setInterval(() => {
+        if (!gameActive) return;
+        timeLeft--;
+        timeDisplay.innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+          endGame("EXCELENTE TRABALHO! TRIAGEM CONCLUÍDA!");
+        }
+      }, 1000);
+    }
+
+    function updateStatusUI() {
+      scoreDisplay.innerText = score;
+      errorsDisplay.innerText = errors;
+      timeDisplay.innerText = timeLeft;
+      
+      const speedMultiplier = (currentSpeed / BASE_SPEED).toFixed(1);
+      speedDisplay.innerText = `${speedMultiplier}x`;
+    }
+
+    function adjustDifficulty(isCorrect) {
+      if (isCorrect) {
+        comboStreak++;
+        currentSpeed = Math.min(1.5, BASE_SPEED + (comboStreak * 0.05));
+      } else {
+        comboStreak = 0;
+        currentSpeed = Math.max(BASE_SPEED, currentSpeed - 0.2);
+      }
+      updateStatusUI();
+    }
+
+    function registerError() {
+      errors++;
+      adjustDifficulty(false);
+      
+      mainCard.classList.remove('shake');
+      void mainCard.offsetWidth;
+      mainCard.classList.add('shake');
+
+      if (errors >= MAX_ERRORS) {
+        endGame("FALHA NO SISTEMA! LIMITE DE 7 ERROS ATINGIDO!");
+        return true; // Retorna true se o jogo acabou
+      }
+      return false;
+    }
+
+    function handleInput(keyAction) {
+      if (!gameActive) return;
+
+      if (currentItem && currentItem.action === keyAction) {
+        score += 10 + (comboStreak * 2);
+        adjustDifficulty(true);
+        spawnNextItem();
+      } else {
+        const isGameOver = registerError();
+        if (!isGameOver) {
+          spawnNextItem();
+        }
+      }
+    }
+
+    function endGame(message) {
+      gameActive = false;
+      clearInterval(gameLoop);
+      clearInterval(timerLoop);
+      
+      winnerText.innerText = message;
+      overlay.style.display = 'flex';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (!gameActive) return;
+
+      const key = e.key.toUpperCase();
+      if (key === 'F' || key === 'J') {
+        handleInput(key);
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
