@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz · Mulheres na Ciência</title>
+
+    <!-- Bootstrap 5 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Fonte Bebas Neue (constructivist) + IBM Plex Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ============================================================
+               CONSTRUCTIVIST CUSTOM STYLES (mínimo, apenas o essencial)
+               ============================================================ */
+        :root {
+            --red: #E53935;
+            --red-dark: #B71C1C;
+            --yellow: #FFC107;
+            --yellow-light: #FFD54F;
+            --black: #121212;
+            --black-light: #1E1E1E;
+            --white: #F5F5F5;
+            --gray: #8C8C8C;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- fundo com linhas diagonais (construtivista) --- */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(229, 57, 53, 0.06) 40px,
+                    rgba(229, 57, 53, 0.06) 41px),
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 193, 7, 0.04) 40px,
+                    rgba(255, 193, 7, 0.04) 41px),
+                radial-gradient(ellipse at 20% 10%, rgba(229, 57, 53, 0.10), transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(255, 193, 7, 0.07), transparent 50%);
+        }
+
+        /* --- formas geométricas flutuantes --- */
+        .geo-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.12;
+        }
+        .geo-shape--rect {
+            width: 140px;
+            height: 90px;
+            background: var(--red);
+            top: 6%;
+            right: 2%;
+            transform: rotate(15deg);
+        }
+        .geo-shape--circle {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 5px solid var(--yellow);
+            bottom: -40px;
+            left: -80px;
+        }
+        .geo-shape--triangle {
+            width: 0;
+            height: 0;
+            border-left: 80px solid transparent;
+            border-right: 80px solid transparent;
+            border-bottom: 130px solid var(--red-dark);
+            top: 55%;
+            right: 0%;
+            transform: rotate(20deg);
+            opacity: 0.08;
+        }
+        .geo-shape--line {
+            position: fixed;
+            width: 200%;
+            height: 2px;
+            background: var(--yellow);
+            opacity: 0.06;
+            transform: rotate(-18deg);
+            top: 30%;
+            left: -30%;
+            z-index: 0;
+        }
+
+        /* --- container principal (elevado sobre o fundo) --- */
+        .quiz-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        /* --- card do quiz (estilo construtivista) --- */
+        .quiz-card {
+            background: rgba(18, 18, 18, 0.92);
+            backdrop-filter: blur(4px);
+            border: 3px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0;
+            padding: 28px 24px;
+            box-shadow: 14px 14px 0 rgba(229, 57, 53, 0.18);
+            transition: box-shadow 0.2s;
+        }
+        .quiz-card:hover {
+            box-shadow: 18px 18px 0 rgba(229, 57, 53, 0.25);
+        }
+
+        /* --- cabeçalho com borda vermelha (assinatura construtivista) --- */
+        .header-construct {
+            border-left: 8px solid var(--red);
+            padding-left: 18px;
+            margin-bottom: 24px;
+        }
+        .header-construct .eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin-bottom: 2px;
+        }
+        .header-construct h1 {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(32px, 6vw, 48px);
+            text-transform: uppercase;
+            color: var(--white);
+            letter-spacing: 0.04em;
+            line-height: 1.05;
+            margin: 0;
+            text-shadow: 4px 4px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.5);
+        }
+        .header-construct h1 .highlight {
+            color: var(--yellow);
+        }
+        .header-construct .sub {
+            font-size: 14px;
+            color: var(--gray);
+            border-left: 3px solid var(--yellow);
+            padding-left: 14px;
+            margin-top: 6px;
+        }
+
+        /* --- progresso (pergunta atual) --- */
+        .progress-indicator {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--gray);
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+        .progress-indicator strong {
+            color: var(--yellow);
+        }
+
+        /* --- pergunta --- */
+        .question-text {
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            font-size: clamp(20px, 3.5vw, 30px);
+            letter-spacing: 0.02em;
+            color: var(--white);
+            line-height: 1.3;
+            margin-bottom: 24px;
+            min-height: 70px;
+        }
+
+        /* --- botões de resposta (estilo construtivista) --- */
+        .answer-btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 14px 20px;
+            background: var(--black-light);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0;
+            color: var(--white);
+            transition: all 0.15s ease;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .answer-btn:hover:not(:disabled) {
+            background: #2A2A2A;
+            border-color: var(--yellow);
+            transform: scale(1.02);
+        }
+        .answer-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .answer-btn.correct {
+            background: #2E7D32 !important;
+            border-color: #4CAF50 !important;
+            color: white;
+        }
+        .answer-btn.wrong {
+            background: #B71C1C !important;
+            border-color: var(--red) !important;
+            color: white;
+        }
+        .answer-btn .letter {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            background: var(--red);
+            color: var(--white);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            margin-right: 14px;
+            border-radius: 0;
+        }
+
+        /* --- área de resultado --- */
+        .result-box {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .result-box .score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            color: var(--yellow);
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
+        }
+        .result-box .score-label {
+            font-size: 16px;
+            color: var(--gray);
+            letter-spacing: 0.06em;
+        }
+        .result-box .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 16px 0 20px;
+            flex-wrap: wrap;
+        }
+        .result-box .stats-grid .stat-item {
+            text-align: center;
+        }
+        .result-box .stats-grid .stat-item .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            line-height: 1.2;
+        }
+        .result-box .stats-grid .stat-item .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--gray);
+        }
+        .result-box .stats-grid .stat-item.hits .stat-number {
+            color: #4CAF50;
+        }
+        .result-box .stats-grid .stat-item.misses .stat-number {
+            color: var(--red);
+        }
+
+        .btn-restart {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 12px 36px;
+            background: transparent;
+            border: 3px solid var(--yellow);
+            color: var(--yellow);
+            border-radius: 0;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        .btn-restart:hover {
+            background: var(--yellow);
+            color: var(--black);
+        }
+
+        /* --- footer --- */
+        .footer-construct {
+            margin-top: 24px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--gray);
+            text-align: center;
+            border-top: 2px solid rgba(255, 255, 255, 0.04);
+            padding-top: 16px;
+        }
+
+        /* --- responsivo --- */
+        @media (max-width: 576px) {
+            .quiz-card {
+                padding: 18px 14px;
+                box-shadow: 8px 8px 0 rgba(229, 57, 53, 0.15);
+            }
+            .header-construct h1 {
+                text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0, 0, 0, 0.5);
+            }
+            .answer-btn {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+            .answer-btn .letter {
+                width: 24px;
+                height: 24px;
+                line-height: 24px;
+                font-size: 16px;
+                margin-right: 10px;
+            }
+            .result-box .stats-grid {
+                gap: 16px;
+            }
+            .result-box .stats-grid .stat-item .stat-number {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== FORMAS GEOMÉTRICAS ===== -->
+    <div class="geo-shape geo-shape--rect"></div>
+    <div class="geo-shape geo-shape--circle"></div>
+    <div class="geo-shape geo-shape--triangle"></div>
+    <div class="geo-shape--line"></div>
+
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <div class="quiz-wrapper">
+
+        <div class="quiz-card">
+
+            <!-- CABEÇALHO -->
+            <div class="header-construct">
+                <div class="eyebrow">Dia D · Tecnologia — Feira de Ciências</div>
+                <h1>Quiz · <span class="highlight">Pioneiras</span></h1>
+                <div class="sub">Mulheres que mudaram a ciência — responda e desvende suas histórias.</div>
+            </div>
+
+            <!-- ÁREA DO QUIZ -->
+            <div id="quizArea">
+
+                <!-- indicador de progresso -->
+                <div class="progress-indicator" id="progressText">Pergunta <strong>1</strong> de <span id="totalQuestions">5</span></div>
+
+                <!-- pergunta -->
+                <div class="question-text" id="questionText">Carregando pergunta...</div>
+
+                <!-- botões de resposta -->
+                <div id="answersContainer">
+                    <!-- preenchido via JS -->
+                </div>
+
+                <!-- área de resultado (inicialmente oculta) -->
+                <div id="resultArea" style="display: none;">
+                    <div class="result-box">
+                        <div class="score-label">Você acertou</div>
+                        <div class="score" id="scoreDisplay">0</div>
+                        <div class="score-label">de <span id="totalScore">5</span> perguntas</div>
+
+                        <div class="stats-grid">
+                            <div class="stat-item hits">
+                                <div class="stat-number" id="hitsDisplay">0</div>
+                                <div class="stat-label">✅ Acertos</div>
+                            </div>
+                            <div class="stat-item misses">
+                                <div class="stat-number" id="missesDisplay">0</div>
+                                <div class="stat-label">❌ Erros</div>
+                            </div>
+                        </div>
+
+                        <button class="btn-restart" id="restartBtn">Jogar Novamente</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="footer-construct">feito para o Dia D de Tecnologia · tema: mulheres na ciência</div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT — QUIZ COM 20 PERGUNTAS, SELECIONA 5 ALEATÓRIAS
+    ============================================================ -->
+    <script>
+        (function() {
+            // ----- BANCO DE PERGUNTAS (20 perguntas) -----
+            const QUESTION_BANK = [{
+                question: "Quem foi a primeira mulher a ganhar um Prêmio Nobel e a única a ganhar em duas áreas científicas diferentes (Física e Química)?",
+                answers: [
+                    { text: "Rosalind Franklin", correct: false },
+                    { text: "Marie Curie", correct: true },
+                    { text: "Ada Lovelace", correct: false },
+                    { text: "Jane Goodall", correct: false }
+                ]
+            }, {
+                question: "Qual matemática inglesa do século XIX é considerada a primeira programadora de computadores da história?",
+                answers: [
+                    { text: "Ada Lovelace", correct: true },
+                    { text: "Grace Hopper", correct: false },
+                    { text: "Katherine Johnson", correct: false },
+                    { text: "Hedy Lamarr", correct: false }
+                ]
+            }, {
+                question: "Qual cientista teve um papel fundamental na descoberta da estrutura do DNA, mas não recebeu o Prêmio Nobel na época?",
+                answers: [
+                    { text: "Lise Meitner", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Rosalind Franklin", correct: true },
+                    { text: "Chien-Shiung Wu", correct: false }
+                ]
+            }, {
+                question: "Qual matemática da NASA fez os cálculos essenciais para as trajetórias do primeiro voo espacial tripulado dos EUA e da missão Apollo 11?",
+                answers: [
+                    { text: "Valentina Tereshkova", correct: false },
+                    { text: "Sally Ride", correct: false },
+                    { text: "Margaret Hamilton", correct: false },
+                    { text: "Katherine Johnson", correct: true }
+                ]
+            }, {
+                question: "Qual importante cientista brasileira foi pioneira na biologia (estudando anfíbios) e uma das maiores líderes do feminismo no Brasil?",
+                answers: [
+                    { text: "Nise da Silveira", correct: false },
+                    { text: "Bertha Lutz", correct: true },
+                    { text: "Graziela Maciel Barroso", correct: false },
+                    { text: "Johanna Döbereiner", correct: false }
+                ]
+            }, {
+                question: "Qual física austríaca contribuiu para a descoberta da fissão nuclear, mas teve seu papel ofuscado?",
+                answers: [
+                    { text: "Lise Meitner", correct: true },
+                    { text: "Maria Goeppert-Mayer", correct: false },
+                    { text: "Emmy Noether", correct: false },
+                    { text: "Hedwig Kohn", correct: false }
+                ]
+            }, {
+                question: "Qual astrofísica americana descobriu a matéria escura ao medir curvas de rotação de galáxias?",
+                answers: [
+                    { text: "Vera Rubin", correct: true },
+                    { text: "Margaret Burbidge", correct: false },
+                    { text: "Cecilia Payne-Gaposchkin", correct: false },
+                    { text: "Jocelyn Bell Burnell", correct: false }
+                ]
+            }, {
+                question: "Qual engenheira e cientista da computação desenvolveu o conceito de 'software' e foi fundamental na missão Apollo?",
+                answers: [
+                    { text: "Margaret Hamilton", correct: true },
+                    { text: "Grace Hopper", correct: false },
+                    { text: "Katherine Johnson", correct: false },
+                    { text: "Mary Jackson", correct: false }
+                ]
+            }, {
+                question: "Qual foi a primeira mulher afro-americana a viajar ao espaço?",
+                answers: [
+                    { text: "Mae Jemison", correct: true },
+                    { text: "Sally Ride", correct: false },
+                    { text: "Eileen Collins", correct: false },
+                    { text: "Valentina Tereshkova", correct: false }
+                ]
+            }, {
+                question: "Qual engenheira e matemática da NASA foi a primeira engenheira negra da agência, atuando na área de aerodinâmica?",
+                answers: [
+                    { text: "Mary Jackson", correct: true },
+                    { text: "Dorothy Vaughan", correct: false },
+                    { text: "Katherine Johnson", correct: false },
+                    { text: "Christine Darden", correct: false }
+                ]
+            }, {
+                question: "Qual química e cristalógrafa britânica foi essencial para a compreensão da estrutura do DNA, mas morreu antes do Nobel?",
+                answers: [
+                    { text: "Rosalind Franklin", correct: true },
+                    { text: "Dorothy Crowfoot Hodgkin", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Gerty Cori", correct: false }
+                ]
+            }, {
+                question: "Qual matemática afro-americana foi supervisora do grupo de computação da NASA e especialista em linguagem FORTRAN?",
+                answers: [
+                    { text: "Dorothy Vaughan", correct: true },
+                    { text: "Katherine Johnson", correct: false },
+                    { text: "Mary Jackson", correct: false },
+                    { text: "Annie Easley", correct: false }
+                ]
+            }, {
+                question: "Qual cientista da computação criou o primeiro compilador e popularizou a linguagem COBOL?",
+                answers: [
+                    { text: "Grace Hopper", correct: true },
+                    { text: "Ada Lovelace", correct: false },
+                    { text: "Margaret Hamilton", correct: false },
+                    { text: "Hedy Lamarr", correct: false }
+                ]
+            }, {
+                question: "Qual bioquímica ganhou o Nobel de Medicina por descobrir a transposição de genes no milho?",
+                answers: [
+                    { text: "Barbara McClintock", correct: true },
+                    { text: "Rosalind Franklin", correct: false },
+                    { text: "Rita Levi-Montalcini", correct: false },
+                    { text: "Gerty Cori", correct: false }
+                ]
+            }, {
+                question: "Qual bióloga e ecologista brasileira é referência em estudos de fitossociologia e conservação da Mata Atlântica?",
+                answers: [
+                    { text: "Graziela Maciel Barroso", correct: true },
+                    { text: "Bertha Lutz", correct: false },
+                    { text: "Johanna Döbereiner", correct: false },
+                    { text: "Nise da Silveira", correct: false }
+                ]
+            }, {
+                question: "Qual astrofísica americana foi pioneira na classificação estelar e criou o sistema de classificação espectral de Harvard?",
+                answers: [
+                    { text: "Annie Jump Cannon", correct: true },
+                    { text: "Cecilia Payne-Gaposchkin", correct: false },
+                    { text: "Henrietta Swan Leavitt", correct: false },
+                    { text: "Vera Rubin", correct: false }
+                ]
+            }, {
+                question: "Qual astrônoma americana descobriu a relação período-luminosidade das estrelas Cefeidas, fundamental para medir distâncias no universo?",
+                answers: [
+                    { text: "Henrietta Swan Leavitt", correct: true },
+                    { text: "Annie Jump Cannon", correct: false },
+                    { text: "Cecilia Payne-Gaposchkin", correct: false },
+                    { text: "Margaret Burbidge", correct: false }
+                ]
+            }, {
+                question: "Qual neurocientista italiana descobriu o fator de crescimento neural (NGF), ganhando o Nobel de Medicina em 1986?",
+                answers: [
+                    { text: "Rita Levi-Montalcini", correct: true },
+                    { text: "Rosalind Franklin", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Gerty Cori", correct: false }
+                ]
+            }, {
+                question: "Qual física teórica alemã formulou o teorema que relaciona simetrias e leis de conservação, fundamental para a física moderna?",
+                answers: [
+                    { text: "Emmy Noether", correct: true },
+                    { text: "Lise Meitner", correct: false },
+                    { text: "Maria Goeppert-Mayer", correct: false },
+                    { text: "Hedwig Kohn", correct: false }
+                ]
+            }, {
+                question: "Qual química americana ganhou o Nobel de Química em 1980 por seu trabalho em engenharia genética e DNA recombinante?",
+                answers: [
+                    { text: "Gerty Cori", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Rosalind Franklin", correct: false },
+                    { text: "Nenhuma das anteriores – o Nobel de Química de 1980 foi para Paul Berg, Walter Gilbert e Frederick Sanger", correct: false }
+                ],
+                // Vamos corrigir com uma pergunta válida: 
+            }, {
+                question: "Qual bioquímica ganhou o Nobel de Fisiologia ou Medicina em 1977 por descobrir os hormônios peptídicos do cérebro?",
+                answers: [
+                    { text: "Rosalyn Yalow", correct: false },
+                    { text: "Gerty Cori", correct: false },
+                    { text: "Rita Levi-Montalcini", correct: false },
+                    { text: "Nenhuma das anteriores – o Nobel de 1977 foi para Roger Guillemin, Andrew Schally e Rosalyn Yalow (esta última por radioimunoensaio)", correct: false }
+                ],
+                // Vou substituir por uma pergunta definitiva e correta.
+            }];
+
+            // CORREÇÃO: remover as duas últimas perguntas problemáticas e adicionar duas novas.
+            // Substituir as perguntas de índice 18 e 19 (que estão com respostas incorretas) por duas válidas.
+            // Vamos fazer isso diretamente no array, removendo as duas últimas e adicionando novas.
+            // Como o array é estático, vou sobrescrever as duas últimas posições.
+
+            // Nova pergunta 19 (índice 18)
+            QUESTION_BANK[18] = {
+                question: "Qual bioquímica americana desenvolveu o radioimunoensaio (RIA), técnica revolucionária para medir hormônios, ganhando o Nobel de Medicina em 1977?",
+                answers: [
+                    { text: "Rosalyn Yalow", correct: true },
+                    { text: "Gerty Cori", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Rita Levi-Montalcini", correct: false }
+                ]
+            };
+
+            // Nova pergunta 20 (índice 19)
+            QUESTION_BANK[19] = {
+                question: "Qual química e cristalógrafa britânica ganhou o Nobel de Química em 1964 por suas determinações estruturais de substâncias bioquímicas importantes?",
+                answers: [
+                    { text: "Dorothy Crowfoot Hodgkin", correct: true },
+                    { text: "Rosalind Franklin", correct: false },
+                    { text: "Barbara McClintock", correct: false },
+                    { text: "Gerty Cori", correct: false }
+                ]
+            };
+
+            // Agora temos 20 perguntas válidas.
+
+            // ----- UTILITÁRIO: Embaralhamento (Fisher-Yates) -----
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // ----- ELEMENTOS DOM -----
+            const questionText = document.getElementById('questionText');
+            const answersContainer = document.getElementById('answersContainer');
+            const progressText = document.getElementById('progressText');
+            const totalQuestionsSpan = document.getElementById('totalQuestions');
+            const resultArea = document.getElementById('resultArea');
+            const quizArea = document.getElementById('quizArea');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const totalScoreSpan = document.getElementById('totalScore');
+            const hitsDisplay = document.getElementById('hitsDisplay');
+            const missesDisplay = document.getElementById('missesDisplay');
+            const restartBtn = document.getElementById('restartBtn');
+
+            // ----- ESTADO -----
+            let currentQuestions = []; // 5 perguntas selecionadas
+            let currentIndex = 0;
+            let score = 0;
+            let errors = 0;
+            let isAnswered = false;
+
+            // ----- INICIALIZAÇÃO -----
+            function init() {
+                restartBtn.addEventListener('click', restartQuiz);
+                startQuiz();
+            }
+
+            function startQuiz() {
+                // 1. Embaralhar o banco de perguntas
+                const shuffled = shuffleArray([...QUESTION_BANK]);
+                // 2. Pegar as primeiras 5
+                currentQuestions = shuffled.slice(0, 5);
+                // 3. Para cada pergunta, embaralhar as respostas
+                currentQuestions = currentQuestions.map(q => {
+                    return {
+                        question: q.question,
+                        answers: shuffleArray([...q.answers])
+                    };
+                });
+
+                currentIndex = 0;
+                score = 0;
+                errors = 0;
+                isAnswered = false;
+                resultArea.style.display = 'none';
+                quizArea.style.display = 'block';
+                totalQuestionsSpan.textContent = currentQuestions.length;
+                totalScoreSpan.textContent = currentQuestions.length;
+                renderQuestion();
+            }
+
+            function renderQuestion() {
+                isAnswered = false;
+                const total = currentQuestions.length;
+                progressText.innerHTML = `Pergunta <strong>${currentIndex + 1}</strong> de <span>${total}</span>`;
+
+                const q = currentQuestions[currentIndex];
+                questionText.textContent = q.question;
+
+                answersContainer.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+
+                q.answers.forEach((answer, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.innerHTML = `<span class="letter">${letters[idx]}</span> ${answer.text}`;
+                    btn.dataset.correct = answer.correct ? 'true' : 'false';
+                    btn.addEventListener('click', () => selectAnswer(btn));
+                    answersContainer.appendChild(btn);
+                });
+            }
+
+            function selectAnswer(button) {
+                if (isAnswered) return;
+                isAnswered = true;
+
+                const isCorrect = button.dataset.correct === 'true';
+                if (isCorrect) {
+                    score++;
+                    button.classList.add('correct');
+                } else {
+                    errors++;
+                    button.classList.add('wrong');
+                    // Revela a correta
+                    const allBtns = answersContainer.querySelectorAll('.answer-btn');
+                    allBtns.forEach(btn => {
+                        if (btn.dataset.correct === 'true') {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+
+                // Desabilita todos
+                const allBtns = answersContainer.querySelectorAll('.answer-btn');
+                allBtns.forEach(btn => btn.disabled = true);
+
+                // Avança após 1.5s
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex < currentQuestions.length) {
+                        renderQuestion();
+                    } else {
+                        showResult();
+                    }
+                }, 1500);
+            }
+
+            function showResult() {
+                quizArea.style.display = 'none';
+                resultArea.style.display = 'block';
+                scoreDisplay.textContent = score;
+                totalScoreSpan.textContent = currentQuestions.length;
+                hitsDisplay.textContent = score;
+                missesDisplay.textContent = errors;
+            }
+
+            function restartQuiz() {
+                startQuiz();
+            }
+
+            // Inicia
+            init();
+
+        })();
+    </script>
+
+</body>
+</html>
