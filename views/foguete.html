@@ -1,1 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIA D // MULHERES NA CIÊNCIA: PROJETO APOLLO</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
+  <style>
+    :root {
+      --c-red: #ff1e27;
+      --c-yellow: #ffcc00;
+      --c-black: #0d0d0d;
+      --c-white: #ffffff;
+    }
+
+    body {
+      background-color: var(--c-black);
+      color: var(--c-white);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Bebas Neue', cursive;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Estilo Construtivista */
+    .header-banner {
+      background-color: var(--c-red);
+      color: var(--c-white);
+      border-bottom: 6px solid var(--c-white);
+      box-shadow: 0px 8px 0px var(--c-yellow);
+      transform: skewY(-1deg);
+    }
+
+    .constructivist-card {
+      background-color: #141414;
+      border: 4px solid var(--c-white);
+      border-radius: 0 !important;
+      box-shadow: 10px 10px 0px var(--c-red);
+      position: relative;
+    }
+
+    .constructivist-card-p2 {
+      box-shadow: 10px 10px 0px var(--c-yellow);
+    }
+
+    /* Pista dos Foguetes */
+    .track-container {
+      height: 340px;
+      background: repeating-linear-gradient(
+        0deg,
+        #0d0d0d,
+        #0d0d0d 20px,
+        #1a1a1a 20px,
+        #1a1a1a 40px
+      );
+      border: 4px solid var(--c-white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .danger-zone {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 15%;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--c-red),
+        var(--c-red) 10px,
+        #000 10px,
+        #000 20px
+      );
+      opacity: 0.7;
+      border-top: 2px solid var(--c-white);
+    }
+
+    .rocket {
+      font-size: 3rem;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: top 0.1s ease-out;
+      filter: drop-shadow(0px 4px 0px #000);
+    }
+
+    /* Teclas e Status */
+    .key-box {
+      background-color: var(--c-white);
+      color: var(--c-black);
+      border: 4px solid var(--c-black);
+      font-size: 2.5rem;
+      line-height: 1;
+      box-shadow: 5px 5px 0px var(--c-red);
+    }
+
+    .key-box-p2 {
+      box-shadow: 5px 5px 0px var(--c-yellow);
+    }
+
+    .error-badge {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 1.3rem;
+      background-color: var(--c-red);
+      color: var(--c-white);
+      padding: 2px 10px;
+      border: 2px solid var(--c-white);
+      box-shadow: 3px 3px 0px #000;
+    }
+
+    /* Botão e Rodapé */
+    .btn-constructivist {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 2rem;
+      background-color: var(--c-yellow);
+      color: var(--c-black);
+      border: 4px solid var(--c-white);
+      border-radius: 0;
+      box-shadow: 8px 8px 0px var(--c-red);
+      transition: all 0.1s ease;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .btn-constructivist:hover {
+      background-color: var(--c-white);
+      color: var(--c-black);
+      transform: translate(-3px, -3px);
+      box-shadow: 11px 11px 0px var(--c-red);
+    }
+
+    .fact-banner {
+      background-color: var(--c-yellow);
+      color: var(--c-black);
+      border: 3px solid var(--c-white);
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(13, 13, 13, 0.96);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 6px solid var(--c-white);
+    }
+
+    .shake {
+      animation: errorShake 0.2s ease-in-out;
+    }
+
+    @keyframes errorShake {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      25% { transform: translateX(-70%) rotate(-15deg); }
+      75% { transform: translateX(-30%) rotate(15deg); }
+      100% { transform: translateX(-50%) rotate(0deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container mt-4 mb-2">
+    <a href="/games.html" class="btn-constructivist px-4 py-1" style="font-size: 1.5rem;">
+      &#9664; VOLTAR
+    </a>
+  </div>
+
+  <header class="header-banner py-2 text-center mb-3">
+    <h1 class="display-4 fw-bold m-0">MULHERES NA CIÊNCIA // DIA D DA TECNOLOGIA</h1>
+    <p class="m-0 text-uppercase fw-bold text-dark">Lançamento & Controle da Missão NASA Apollo</p>
+  </header>
+
+  <main class="container my-auto position-relative">
+    
+    <div id="overlay">
+      <h2 id="winner-text" class="display-3 fw-bold text-warning mb-2 text-center">PIONEIRAS DO ESPAÇO</h2>
+      <p class="fs-5 text-light mb-3 text-center px-4 max-w-700">
+        Sem o software de <strong>Margaret Hamilton</strong> e os cálculos de <strong>Katherine Johnson</strong>, o homem nunca teria chegado à Lua.<br>
+        <span class="text-danger fw-bold">REGRA:</span> Digite os comandos para manter a propulsão. 7 erros causam falha crítica!
+      </p>
+      <button class="btn-constructivist px-5 py-2" onclick="startGame()">INICIAR CONTAGEM REGRESSIVA</button>
+    </div>
+
+    <div class="row g-4">
+      
+      <div class="col-md-6">
+        <div class="constructivist-card p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h3 class="h3 m-0 text-danger">MARGARET HAMILTON</h3>
+              <small class="text-uppercase text-secondary">Código de Voo Apollo 11 (WASD)</small>
+            </div>
+            <div class="error-badge" id="p1-errors-display">ERROS: 0 / 7</div>
+          </div>
+
+          <div class="track-container mb-3">
+            <div class="danger-zone"></div>
+            <div id="rocket1" class="rocket" style="top: 10%;">🚀</div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between bg-dark p-2 border border-2 border-white">
+            <span class="font-display h5 m-0 text-uppercase">EXECUTAR ALGORITMO:</span>
+            <div id="key1" class="key-box px-4 py-1 fw-bold">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="constructivist-card constructivist-card-p2 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h3 class="h3 m-0 text-warning">KATHERINE JOHNSON</h3>
+              <small class="text-uppercase text-secondary">Cálculos Orbitais NASA (SETAS)</small>
+            </div>
+            <div class="error-badge bg-warning text-dark" id="p2-errors-display">ERROS: 0 / 7</div>
+          </div>
+
+          <div class="track-container mb-3">
+            <div class="danger-zone"></div>
+            <div id="rocket2" class="rocket" style="top: 10%;">🛸</div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between bg-dark p-2 border border-2 border-white">
+            <span class="font-display h5 m-0 text-uppercase">CALCULAR TRAJETÓRIA:</span>
+            <div id="key2" class="key-box key-box-p2 px-4 py-1 fw-bold">-</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="fact-banner text-center text-uppercase">
+          <span>💡 HISTÓRIA: Margaret Hamilton inventou o próprio termo "Engenharia de Software" para dar respeito científico às mulheres que programavam na NASA.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-2 text-secondary text-uppercase fs-7 mt-3">
+    PROJETO ACADÊMICO // ESTILO CONSTRUTIVISTA // DIA D DA TECNOLOGIA
+  </footer>
+
+  <script>
+    const MAX_ERRORS = 7;
+
+    const P1_KEYS = [
+      { code: 'KeyW', display: 'W' },
+      { code: 'KeyA', display: 'A' },
+      { code: 'KeyS', display: 'S' },
+      { code: 'KeyD', display: 'D' }
+    ];
+
+    const P2_KEYS = [
+      { code: 'ArrowUp', display: '↑' },
+      { code: 'ArrowLeft', display: '←' },
+      { code: 'ArrowDown', display: '↓' },
+      { code: 'ArrowRight', display: '→' }
+    ];
+
+    let p1Pos = 10;
+    let p2Pos = 10;
+    let p1Errors = 0;
+    let p2Errors = 0;
+    
+    let p1Target = null;
+    let p2Target = null;
+    let gameActive = false;
+    let gameLoop;
+
+    const r1 = document.getElementById('rocket1');
+    const r2 = document.getElementById('rocket2');
+    const k1Display = document.getElementById('key1');
+    const k2Display = document.getElementById('key2');
+    const p1ErrDisplay = document.getElementById('p1-errors-display');
+    const p2ErrDisplay = document.getElementById('p2-errors-display');
+    const overlay = document.getElementById('overlay');
+    const winnerText = document.getElementById('winner-text');
+
+    function getRandomKey(keysArray) {
+      return keysArray[Math.floor(Math.random() * keysArray.length)];
+    }
+
+    function setNextKey(player) {
+      if (player === 1) {
+        p1Target = getRandomKey(P1_KEYS);
+        k1Display.innerText = p1Target.display;
+      } else {
+        p2Target = getRandomKey(P2_KEYS);
+        k2Display.innerText = p2Target.display;
+      }
+    }
+
+    function startGame() {
+      p1Pos = 10;
+      p2Pos = 10;
+      p1Errors = 0;
+      p2Errors = 0;
+      gameActive = true;
+      
+      overlay.style.display = 'none';
+      updateUI();
+      
+      setNextKey(1);
+      setNextKey(2);
+
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(() => {
+        if (!gameActive) return;
+
+        p1Pos += 0.7; // Velocidade da gravidade
+        p2Pos += 0.7;
+
+        checkStatus();
+        updateUI();
+      }, 50);
+    }
+
+    function updateUI() {
+      r1.style.top = p1Pos + '%';
+      r2.style.top = p2Pos + '%';
+
+      p1ErrDisplay.innerText = `ERROS: ${p1Errors} / ${MAX_ERRORS}`;
+      p2ErrDisplay.innerText = `ERROS: ${p2Errors} / ${MAX_ERRORS}`;
+    }
+
+    function triggerShake(element) {
+      element.classList.remove('shake');
+      void element.offsetWidth;
+      element.classList.add('shake');
+    }
+
+    function checkStatus() {
+      const p1Lost = p1Errors >= MAX_ERRORS || p1Pos >= 85;
+      const p2Lost = p2Errors >= MAX_ERRORS || p2Pos >= 85;
+
+      if (p1Lost && p2Lost) {
+        endGame("FALHA CRÍTICA NOS DOIS SISTEMAS!");
+      } else if (p1Lost) {
+        endGame("KATHERINE JOHNSON GARANTIU A TRAJETÓRIA! 🏆");
+      } else if (p2Lost) {
+        endGame("MARGARET HAMILTON SALVOU A MISSÃO! 🏆");
+      }
+    }
+
+    function endGame(message) {
+      gameActive = false;
+      clearInterval(gameLoop);
+      winnerText.innerText = message;
+      overlay.style.display = 'flex';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (!gameActive) return;
+
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
+
+      // Controles P1 (WASD)
+      if (P1_KEYS.some(k => k.code === e.code)) {
+        if (e.code === p1Target.code) {
+          p1Pos = Math.max(10, p1Pos - 9);
+          setNextKey(1);
+        } else {
+          p1Errors++;
+          triggerShake(r1);
+        }
+      }
+
+      // Controles P2 (Setas)
+      if (P2_KEYS.some(k => k.code === e.code)) {
+        if (e.code === p2Target.code) {
+          p2Pos = Math.max(10, p2Pos - 9);
+          setNextKey(2);
+        } else {
+          p2Errors++;
+          triggerShake(r2);
+        }
+      }
+
+      updateUI();
+      checkStatus();
+    });
+  </script>
+</body>
+</html>
