@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa das Descobertas — Mulheres na Ciência</title>
+
+    <!-- Bootstrap 5 via CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Google Fonts: Bebas Neue (constructivist) + IBM Plex Sans (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ============================================================
+               CONSTRUCTIVIST VARIABLES & RESET
+               ============================================================ */
+        :root {
+            --red: #E53935;
+            --red-dark: #B71C1C;
+            --red-light: #FF6F60;
+            --yellow: #FFC107;
+            --yellow-light: #FFD54F;
+            --black: #121212;
+            --black-light: #1E1E1E;
+            --white: #F5F5F5;
+            --gray: #8C8C8C;
+            --font-display: 'Bebas Neue', 'Impact', 'Helvetica Neue', sans-serif;
+            --font-body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- DIAGONAL BACKGROUND LINES (constructivist) --- */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(229, 57, 53, 0.04) 40px,
+                    rgba(229, 57, 53, 0.04) 41px),
+                repeating-linear-gradient(-45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 193, 7, 0.03) 40px,
+                    rgba(255, 193, 7, 0.03) 41px),
+                radial-gradient(ellipse at 20% 10%, rgba(229, 57, 53, 0.08), transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(255, 193, 7, 0.06), transparent 50%);
+        }
+
+        /* --- GEOMETRIC ACCENTS (floating shapes) --- */
+        .geo-shape {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.10;
+        }
+        .geo-shape--rect {
+            width: 120px;
+            height: 80px;
+            background: var(--red);
+            top: 8%;
+            right: 3%;
+            transform: rotate(12deg);
+        }
+        .geo-shape--circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid var(--yellow);
+            bottom: 5%;
+            left: -60px;
+        }
+        .geo-shape--triangle {
+            width: 0;
+            height: 0;
+            border-left: 70px solid transparent;
+            border-right: 70px solid transparent;
+            border-bottom: 120px solid var(--red-dark);
+            top: 60%;
+            right: 2%;
+            transform: rotate(15deg);
+            opacity: 0.08;
+        }
+        .geo-shape--diag-line {
+            position: fixed;
+            width: 200%;
+            height: 2px;
+            background: var(--yellow);
+            opacity: 0.06;
+            transform: rotate(-20deg);
+            top: 40%;
+            left: -30%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ============================================================
+               LAYOUT — all content sits above background
+               ============================================================ */
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            padding: 20px 16px 50px;
+        }
+
+        /* --- HEADER (constructivist) --- */
+        .header-block {
+            border-left: 8px solid var(--red);
+            padding-left: 18px;
+            margin-bottom: 18px;
+        }
+        .header-block .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin-bottom: 2px;
+        }
+        .header-block h1 {
+            font-family: var(--font-display);
+            font-size: clamp(32px, 6vw, 58px);
+            line-height: 1.05;
+            text-transform: uppercase;
+            color: var(--white);
+            letter-spacing: 0.04em;
+            margin: 0;
+            text-shadow: 4px 4px 0 var(--red), 8px 8px 0 rgba(0, 0, 0, 0.4);
+        }
+        .header-block h1 .highlight {
+            color: var(--yellow);
+        }
+        .header-block .subtitle {
+            font-family: var(--font-body);
+            font-weight: 400;
+            font-size: 14px;
+            color: var(--gray);
+            max-width: 560px;
+            margin-top: 6px;
+            line-height: 1.6;
+            border-left: 3px solid var(--yellow);
+            padding-left: 14px;
+        }
+
+        /* --- CONTROLS (Bootstrap + constructivist twist) --- */
+        .controls-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 12px 16px;
+            background: rgba(30, 30, 30, 0.7);
+            border-left: 6px solid var(--red);
+            backdrop-filter: blur(4px);
+        }
+
+        .controls-wrap .btn-group-custom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .controls-wrap .btn-group-custom .btn-level {
+            font-family: var(--font-display);
+            font-size: 14px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            border: 2px solid var(--gray);
+            background: transparent;
+            color: var(--gray);
+            border-radius: 0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-weight: 400;
+        }
+        .controls-wrap .btn-group-custom .btn-level.active {
+            border-color: var(--yellow);
+            color: var(--yellow);
+            background: rgba(255, 193, 7, 0.10);
+        }
+        .controls-wrap .btn-group-custom .btn-level:hover {
+            border-color: var(--white);
+            color: var(--white);
+        }
+
+        .controls-wrap .btn-construct {
+            font-family: var(--font-display);
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            border: 2px solid var(--gray);
+            background: transparent;
+            color: var(--gray);
+            border-radius: 0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-weight: 400;
+        }
+        .controls-wrap .btn-construct:hover {
+            border-color: var(--white);
+            color: var(--white);
+        }
+        .controls-wrap .btn-construct.flag-on {
+            border-color: var(--yellow);
+            color: var(--yellow);
+            background: rgba(255, 193, 7, 0.10);
+        }
+        .controls-wrap .btn-construct.reveal-on {
+            border-color: var(--red);
+            color: var(--red);
+            background: rgba(229, 57, 53, 0.10);
+        }
+
+        /* --- STATS (constructivist) --- */
+        .stats-block {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 24px;
+            margin-bottom: 18px;
+            padding: 10px 18px;
+            background: rgba(18, 18, 18, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+        }
+        .stat-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .stat-item .label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gray);
+        }
+        .stat-item .value {
+            font-family: var(--font-mono);
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--yellow);
+            text-shadow: 0 0 12px rgba(255, 193, 7, 0.25);
+            min-width: 60px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0 8px;
+            letter-spacing: 0.06em;
+            border-left: 3px solid var(--red);
+        }
+        .face-btn {
+            font-size: 30px;
+            line-height: 1;
+            padding: 0 10px;
+            background: transparent;
+            border: 2px solid var(--gray);
+            border-radius: 0;
+            color: var(--white);
+            cursor: pointer;
+            transition: all 0.15s;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 52px;
+            min-height: 52px;
+        }
+        .face-btn:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 193, 7, 0.06);
+        }
+
+        /* --- BOARD (constructivist) --- */
+        .board-wrap {
+            background: rgba(18, 18, 18, 0.85);
+            border: 3px solid rgba(255, 255, 255, 0.06);
+            padding: 12px;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: auto;
+            box-shadow: 12px 12px 0 rgba(229, 57, 53, 0.15);
+            max-width: 100%;
+        }
+        .board-wrap::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 3px solid var(--red);
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        #board {
+            display: grid;
+            gap: 3px;
+            touch-action: manipulation;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .cell {
+            background: var(--black-light);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: background 0.08s, transform 0.08s;
+            aspect-ratio: 1/1;
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+        }
+        .cell:hover {
+            background: #2A2A2A;
+            transform: scale(1.02);
+            z-index: 2;
+        }
+        .cell.revealed {
+            background: #0D0D0D;
+            cursor: default;
+            border-color: rgba(255, 255, 255, 0.03);
+            transform: none;
+        }
+        .cell.flagged {
+            font-size: 0.9em;
+            background: rgba(255, 193, 7, 0.08);
+            border-color: rgba(255, 193, 7, 0.2);
+        }
+        .cell.mine-hit {
+            background: var(--red) !important;
+            animation: flashMine 0.35s ease;
+            border-color: var(--red) !important;
+        }
+        .cell.mine-revealed {
+            background: #1A0A0A;
+            border-color: rgba(229, 57, 53, 0.2);
+        }
+        @keyframes flashMine {
+            0% {
+                background: #fff;
+                transform: scale(1.3);
+            }
+            100% {
+                background: var(--red);
+                transform: scale(1);
+            }
+        }
+
+        /* number colors (constructivist palette) */
+        .n1 {
+            color: #6DB8FF;
+        }
+        .n2 {
+            color: #6BE5A3;
+        }
+        .n3 {
+            color: #FF8F7D;
+        }
+        .n4 {
+            color: #C79BFF;
+        }
+        .n5 {
+            color: #FFB35C;
+        }
+        .n6 {
+            color: #4FD1C5;
+        }
+        .n7 {
+            color: #F2C874;
+        }
+        .n8 {
+            color: #E6E6E6;
+        }
+
+        /* --- BANNER (win/lose) --- */
+        .banner-construct {
+            padding: 14px 22px;
+            font-family: var(--font-display);
+            font-size: 18px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            text-align: center;
+            display: none;
+            border-left: 8px solid var(--yellow);
+            margin-bottom: 10px;
+        }
+        .banner-construct.show {
+            display: block;
+        }
+        .banner-construct.win {
+            background: rgba(255, 193, 7, 0.08);
+            color: var(--yellow);
+            border-color: var(--yellow);
+        }
+        .banner-construct.lose {
+            background: rgba(229, 57, 53, 0.08);
+            color: var(--red-light);
+            border-color: var(--red);
+        }
+
+        /* --- GALLERY (constructivist cards) --- */
+        .gallery-section {
+            margin-top: 30px;
+            border-top: 3px solid rgba(255, 255, 255, 0.04);
+            padding-top: 22px;
+        }
+        .gallery-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            border-left: 6px solid var(--red);
+            padding-left: 14px;
+        }
+        .gallery-head h2 {
+            font-family: var(--font-display);
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--white);
+            margin: 0;
+        }
+        .gallery-head h2 .highlight {
+            color: var(--yellow);
+        }
+        .gallery-head p {
+            color: var(--gray);
+            font-size: 13px;
+            margin: 0;
+            font-weight: 400;
+        }
+        .gallery-head p .num {
+            color: var(--yellow);
+            font-weight: 700;
+        }
+
+        #gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+        }
+
+        .tile {
+            background: rgba(30, 30, 30, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            padding: 16px 14px 14px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+            position: relative;
+        }
+        .tile.locked {
+            border-color: rgba(255, 255, 255, 0.04);
+            background: repeating-linear-gradient(135deg,
+                    rgba(30, 30, 30, 0.8),
+                    rgba(30, 30, 30, 0.8) 10px,
+                    rgba(18, 18, 18, 0.9) 10px,
+                    rgba(18, 18, 18, 0.9) 20px);
+        }
+        .tile.unlocked {
+            border-color: rgba(255, 193, 7, 0.2);
+            box-shadow: 0 4px 20px rgba(229, 57, 53, 0.06);
+        }
+        .tile.unlocked:hover {
+            transform: translateY(-4px);
+            border-color: var(--yellow);
+            box-shadow: 0 8px 30px rgba(255, 193, 7, 0.08);
+        }
+        .tile .idx {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--gray);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .tile .symbol {
+            font-family: var(--font-display);
+            font-size: 34px;
+            font-weight: 400;
+            color: var(--yellow);
+            line-height: 1.1;
+            margin: 2px 0;
+            letter-spacing: 0.02em;
+        }
+        .tile.locked .symbol {
+            color: var(--gray);
+            font-size: 28px;
+        }
+        .tile .name {
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--white);
+            margin-top: 2px;
+        }
+        .tile .field {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--red-light);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 1px;
+        }
+        .tile .fact {
+            font-size: 11px;
+            color: var(--gray);
+            line-height: 1.5;
+            margin-top: 8px;
+            flex: 1;
+        }
+        .tile.locked .fact,
+        .tile.locked .field,
+        .tile.locked .name {
+            visibility: hidden;
+        }
+        .tile .lock-overlay {
+            display: none;
+            font-family: var(--font-display);
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-top: 6px;
+        }
+        .tile.locked .lock-overlay {
+            display: block;
+        }
+
+        /* --- FOOTER --- */
+        .footer-construct {
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 2px solid rgba(255, 255, 255, 0.04);
+            color: var(--gray);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* --- RESPONSIVE TWEAKS --- */
+        @media (max-width: 576px) {
+            .stats-block {
+                gap: 8px 14px;
+                padding: 8px 12px;
+            }
+            .stat-item .value {
+                font-size: 20px;
+                min-width: 44px;
+            }
+            .face-btn {
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 22px;
+            }
+            .header-block h1 {
+                text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0, 0, 0, 0.4);
+            }
+            .controls-wrap {
+                padding: 10px 12px;
+            }
+            .controls-wrap .btn-construct,
+            .controls-wrap .btn-group-custom .btn-level {
+                font-size: 11px;
+                padding: 4px 12px;
+            }
+            #gallery {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .board-wrap {
+                padding: 8px;
+            }
+            .cell {
+                border-width: 1px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            #gallery {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== CONSTRUCTIVIST GEOMETRIC ACCENTS ===== -->
+    <div class="geo-shape geo-shape--rect"></div>
+    <div class="geo-shape geo-shape--circle"></div>
+    <div class="geo-shape geo-shape--triangle"></div>
+    <div class="geo-shape--diag-line"></div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div class="app-wrapper container-fluid">
+
+        <!-- HEADER -->
+        <div class="header-block">
+            <div class="eyebrow">Dia D · Tecnologia — Feira de Ciências</div>
+            <h1>Mapa das <span class="highlight">Descobertas</span></h1>
+            <div class="subtitle">
+                Um campo minado sobre mulheres que mudaram a ciência.<br />
+                Explore os setores, desvie dos obstáculos e desbloqueie a história de uma cientista a cada laboratório vencido.
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls-wrap">
+            <div class="btn-group-custom" id="difficultySeg">
+                <button class="btn-level active" data-level="facil">Fácil</button>
+                <button class="btn-level" data-level="medio">Médio</button>
+                <button class="btn-level" data-level="dificil">Difícil</button>
+            </div>
+            <button class="btn-construct" id="flagModeBtn">⚗️ Marcar</button>
+            <button class="btn-construct reveal-on" id="revealAllBtn">🗂️ Galeria</button>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-block">
+            <div class="stat-item">
+                <span class="label">Obstáculos</span>
+                <span class="value" id="mineCounter">010</span>
+            </div>
+            <button class="face-btn" id="restartBtn" title="Novo laboratório">🧪</button>
+            <div class="stat-item">
+                <span class="label">Tempo</span>
+                <span class="value" id="timer">000</span>
+            </div>
+        </div>
+
+        <!-- BOARD -->
+        <div class="board-wrap">
+            <div id="board"></div>
+        </div>
+
+        <!-- BANNER (win/lose) -->
+        <div class="banner-construct" id="banner"></div>
+
+        <!-- GALLERY -->
+        <section class="gallery-section">
+            <div class="gallery-head">
+                <div>
+                    <h2>Galeria <span class="highlight">Elementos</span> — Cientistas</h2>
+                </div>
+                <p>Descobertas: <span class="num" id="unlockedCount">0</span> / 10</p>
+            </div>
+            <div id="gallery"></div>
+        </section>
+
+        <!-- FOOTER -->
+        <div class="footer-construct">feito para o Dia D de Tecnologia · tema: mulheres na ciência</div>
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT — toda a lógica do jogo (idêntica à original)
+    ============================================================ -->
+    <script>
+        /* ================= CONFIG ================= */
+        const LEVELS = {
+            facil: { rows: 8, cols: 8, mines: 10 },
+            medio: { rows: 12, cols: 12, mines: 22 },
+            dificil: { rows: 16, cols: 16, mines: 40 },
+        };
+
+        const SCIENTISTS = [{
+            symbol: "Cu",
+            name: "Marie Curie",
+            field: "Física & Química",
+            fact: "Pioneira no estudo da radioatividade, foi a primeira pessoa a ganhar dois prêmios Nobel, em áreas científicas diferentes."
+        }, {
+            symbol: "Ad",
+            name: "Ada Lovelace",
+            field: "Matemática & Computação",
+            fact: "Escreveu, no século 19, o que é considerado o primeiro algoritmo destinado a ser processado por uma máquina, a Máquina Analítica."
+        }, {
+            symbol: "Rf",
+            name: "Rosalind Franklin",
+            field: "Química & Biofísica",
+            fact: "Suas imagens de difração de raios X foram essenciais para revelar a estrutura em dupla hélice do DNA."
+        }, {
+            symbol: "Kj",
+            name: "Katherine Johnson",
+            field: "Matemática & Aeroespacial",
+            fact: "Calculou manualmente as trajetórias de voos espaciais da NASA, incluindo a missão que levou o homem à Lua."
+        }, {
+            symbol: "Cw",
+            name: "Chien-Shiung Wu",
+            field: "Física Nuclear",
+            fact: "Conduziu um experimento decisivo que derrubou a lei da conservação da paridade, mudando o rumo da física de partículas."
+        }, {
+            symbol: "Rl",
+            name: "Rita Levi-Montalcini",
+            field: "Neurobiologia",
+            fact: "Descobriu o fator de crescimento neural, revelando como as células nervosas se desenvolvem, o que lhe rendeu o Nobel."
+        }, {
+            symbol: "Ty",
+            name: "Tu Youyou",
+            field: "Farmacologia",
+            fact: "Descobriu a artemisinina, um composto que revolucionou o tratamento da malária e salvou milhões de vidas."
+        }, {
+            symbol: "Hl",
+            name: "Hedy Lamarr",
+            field: "Engenharia & Invenção",
+            fact: "Além de atriz, coinventou uma técnica de salto de frequência que hoje é base do Wi-Fi e do Bluetooth."
+        }, {
+            symbol: "Ma",
+            name: "Mary Anning",
+            field: "Paleontologia",
+            fact: "Encontrou alguns dos primeiros fósseis completos de répteis marinhos, ajudando a fundar a paleontologia moderna."
+        }, {
+            symbol: "Gh",
+            name: "Grace Hopper",
+            field: "Ciência da Computação",
+            fact: "Criou o primeiro compilador e ajudou a desenvolver o COBOL, uma das primeiras linguagens de programação legíveis."
+        }, ];
+
+        /* ================= STATE ================= */
+        let rows, cols, mineCount;
+        let grid = [];
+        let revealedCount = 0;
+        let flagsPlaced = 0;
+        let firstClickDone = false;
+        let gameOver = false;
+        let flagMode = false;
+        let timerInterval = null;
+        let seconds = 0;
+        let currentLevel = "facil";
+        let scientistOrder = shuffle([...Array(SCIENTISTS.length).keys()]);
+        let unlockedSet = new Set();
+        let allRevealedManually = false;
+
+        const boardEl = document.getElementById("board");
+        const mineCounterEl = document.getElementById("mineCounter");
+        const timerEl = document.getElementById("timer");
+        const bannerEl = document.getElementById("banner");
+        const restartBtn = document.getElementById("restartBtn");
+        const flagModeBtn = document.getElementById("flagModeBtn");
+        const revealAllBtn = document.getElementById("revealAllBtn");
+        const galleryEl = document.getElementById("gallery");
+        const unlockedCountEl = document.getElementById("unlockedCount");
+
+        /* ================= HELPERS ================= */
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* ================= INIT ================= */
+        document.querySelectorAll("#difficultySeg .btn-level").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll("#difficultySeg .btn-level").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                currentLevel = btn.dataset.level;
+                newGame();
+            });
+        });
+
+        restartBtn.addEventListener("click", newGame);
+
+        flagModeBtn.addEventListener("click", () => {
+            flagMode = !flagMode;
+            flagModeBtn.classList.toggle("flag-on", flagMode);
+            flagModeBtn.textContent = flagMode ? "🔬 Marcar: ATIVO" : "⚗️ Marcar";
+        });
+
+        revealAllBtn.addEventListener("click", () => {
+            allRevealedManually = !allRevealedManually;
+            revealAllBtn.classList.toggle("reveal-on", !allRevealedManually);
+            revealAllBtn.textContent = allRevealedManually ? "🗂️ Ocultar" : "🗂️ Galeria";
+            renderGallery();
+        });
+
+        function newGame() {
+            const level = LEVELS[currentLevel];
+            rows = level.rows;
+            cols = level.cols;
+            mineCount = level.mines;
+            grid = [];
+            revealedCount = 0;
+            flagsPlaced = 0;
+            firstClickDone = false;
+            gameOver = false;
+            seconds = 0;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerEl.textContent = "000";
+            mineCounterEl.textContent = String(mineCount).padStart(3, "0");
+            bannerEl.className = "banner-construct";
+            bannerEl.textContent = "";
+            restartBtn.textContent = "🧪";
+
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    row.push({ mine: false, count: 0, revealed: false, flagged: false });
+                }
+                grid.push(row);
+            }
+
+            boardEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            // --- cell size adjusted: smaller, based on column count ---
+            let cellSize;
+            if (cols > 12) cellSize = 26;
+            else if (cols > 8) cellSize = 30;
+            else cellSize = 34;
+
+            renderBoard(cellSize);
+        }
+
+        function renderBoard(cellSize) {
+            boardEl.innerHTML = "";
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const div = document.createElement("div");
+                    div.className = "cell";
+                    div.style.fontSize = Math.max(10, cellSize * 0.4) + "px";
+                    // set explicit width/height to keep cells square and controlled
+                    div.style.width = cellSize + "px";
+                    div.style.height = cellSize + "px";
+                    div.dataset.r = r;
+                    div.dataset.c = c;
+                    div.addEventListener("click", onCellClick);
+                    div.addEventListener("contextmenu", onCellRightClick);
+                    boardEl.appendChild(div);
+                }
+            }
+        }
+
+        /* ================= MINE PLACEMENT ================= */
+        function placeMines(excludeR, excludeC) {
+            const forbidden = new Set();
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = excludeR + dr,
+                        nc = excludeC + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) forbidden.add(nr + "_" + nc);
+                }
+            }
+            let placed = 0;
+            while (placed < mineCount) {
+                const r = Math.floor(Math.random() * rows);
+                const c = Math.floor(Math.random() * cols);
+                const key = r + "_" + c;
+                if (forbidden.has(key) || grid[r][c].mine) continue;
+                grid[r][c].mine = true;
+                placed++;
+            }
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid[r][c].mine) continue;
+                    let count = 0;
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr,
+                                nc = c + dc;
+                            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc].mine) count++;
+                        }
+                    }
+                    grid[r][c].count = count;
+                }
+            }
+        }
+
+        /* ================= INTERACTION ================= */
+        function onCellClick(e) {
+            if (gameOver) return;
+            const r = +e.currentTarget.dataset.r;
+            const c = +e.currentTarget.dataset.c;
+            if (flagMode) {
+                toggleFlag(r, c);
+                return;
+            }
+            if (grid[r][c].flagged) return;
+
+            if (!firstClickDone) {
+                placeMines(r, c);
+                firstClickDone = true;
+                startTimer();
+            }
+            revealCell(r, c);
+            checkWin();
+        }
+
+        function onCellRightClick(e) {
+            e.preventDefault();
+            if (gameOver) return;
+            const r = +e.currentTarget.dataset.r;
+            const c = +e.currentTarget.dataset.c;
+            toggleFlag(r, c);
+        }
+
+        function toggleFlag(r, c) {
+            const cell = grid[r][c];
+            if (cell.revealed) return;
+            cell.flagged = !cell.flagged;
+            flagsPlaced += cell.flagged ? 1 : -1;
+            mineCounterEl.textContent = String(mineCount - flagsPlaced).padStart(3, "0");
+            updateCellDisplay(r, c);
+        }
+
+        function revealCell(r, c) {
+            const cell = grid[r][c];
+            if (cell.revealed || cell.flagged) return;
+            cell.revealed = true;
+            revealedCount++;
+            updateCellDisplay(r, c);
+
+            if (cell.mine) {
+                loseGame(r, c);
+                return;
+            }
+            if (cell.count === 0) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = r + dr,
+                            nc = c + dc;
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) revealCell(nr, nc);
+                    }
+                }
+            }
+        }
+
+        function updateCellDisplay(r, c) {
+            const cell = grid[r][c];
+            const el = boardEl.children[r * cols + c];
+            el.className = "cell";
+            el.textContent = "";
+            if (cell.flagged && !cell.revealed) {
+                el.classList.add("flagged");
+                el.textContent = "⚗️";
+                return;
+            }
+            if (!cell.revealed) return;
+            el.classList.add("revealed");
+            if (cell.mine) {
+                el.textContent = "☄️";
+                return;
+            }
+            if (cell.count > 0) {
+                el.textContent = cell.count;
+                el.classList.add("n" + cell.count);
+            }
+        }
+
+        /* ================= WIN / LOSE ================= */
+        function loseGame(hitR, hitC) {
+            gameOver = true;
+            clearInterval(timerInterval);
+            restartBtn.textContent = "😵";
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = grid[r][c];
+                    const el = boardEl.children[r * cols + c];
+                    if (cell.mine && !cell.revealed) {
+                        el.className = "cell revealed mine-revealed";
+                        el.textContent = "☄️";
+                    }
+                }
+            }
+            const hitEl = boardEl.children[hitR * cols + hitC];
+            hitEl.className = "cell mine-hit";
+            bannerEl.className = "banner-construct lose show";
+            bannerEl.textContent = "Obstáculo encontrado! Até grandes cientistas enfrentaram contratempos — tente de novo.";
+        }
+
+        function checkWin() {
+            if (gameOver) return;
+            const totalSafe = rows * cols - mineCount;
+            if (revealedCount === totalSafe) {
+                gameOver = true;
+                clearInterval(timerInterval);
+                restartBtn.textContent = "🏆";
+                bannerEl.className = "banner-construct win show";
+                const unlocked = unlockNextScientist();
+                if (unlocked) {
+                    bannerEl.textContent = `Laboratório desvendado! Você revelou uma nova cientista: ${unlocked.name}.`;
+                } else {
+                    bannerEl.textContent = "Laboratório desvendado! Você já revelou todas as cientistas da galeria.";
+                }
+            }
+        }
+
+        /* ================= TIMER ================= */
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                timerEl.textContent = String(Math.min(seconds, 999)).padStart(3, "0");
+            }, 1000);
+        }
+
+        /* ================= GALLERY ================= */
+        function unlockNextScientist() {
+            for (const idx of scientistOrder) {
+                if (!unlockedSet.has(idx)) {
+                    unlockedSet.add(idx);
+                    renderGallery();
+                    return SCIENTISTS[idx];
+                }
+            }
+            renderGallery();
+            return null;
+        }
+
+        function renderGallery() {
+            galleryEl.innerHTML = "";
+            unlockedCountEl.textContent = unlockedSet.size;
+            SCIENTISTS.forEach((s, idx) => {
+                const isUnlocked = unlockedSet.has(idx) || allRevealedManually;
+                const tile = document.createElement("div");
+                tile.className = "tile " + (isUnlocked ? "unlocked" : "locked");
+                tile.innerHTML = `
+              <span class="idx">Nº ${String(idx+1).padStart(2,"0")}</span>
+              <span class="symbol">${isUnlocked ? s.symbol : "??"}</span>
+              <span class="name">${isUnlocked ? s.name : "Não descoberta"}</span>
+              <span class="field">${s.field}</span>
+              <span class="fact">${s.fact}</span>
+              <span class="lock-overlay">🔒 desbloqueie no jogo</span>
+            `;
+                galleryEl.appendChild(tile);
+            });
+        }
+
+        /* ================= START ================= */
+        renderGallery();
+        newGame();
+    </script>
+
+</body>
+</html>
