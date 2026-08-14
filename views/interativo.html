@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mulheres na Ciência - Desafio Interativo de Invenções</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --c-red: #e63946;
+            --c-yellow: #ffb703;
+            --c-black: #0d0d0d;
+            --c-white: #ffffff;
+            --c-gray: #1a1a1a;
+            --c-green: #2a9d8f;
+        }
+
+        body {
+            background-color: var(--c-black);
+            color: var(--c-white);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(45deg, #141414 25%, transparent 25%), 
+                linear-gradient(-45deg, #141414 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #141414 75%), 
+                linear-gradient(-45deg, transparent 75%, #141414 75%);
+            background-size: 40px 40px;
+        }
+
+        h1, h2, h3, .font-constructivist {
+            font-family: 'Bebas Neue', cursive;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Botão Voltar para Home */
+        .btn-home {
+            background-color: transparent;
+            color: var(--c-yellow);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.3rem;
+            border: 3px solid var(--c-yellow);
+            border-radius: 0;
+            box-shadow: 4px 4px 0px var(--c-red);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: var(--c-yellow);
+            color: var(--c-black);
+            box-shadow: 6px 6px 0px var(--c-white);
+            transform: translate(-2px, -2px);
+        }
+
+        /* Card Construtivista do Desafio */
+        .quiz-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .constructivist-card {
+            background: var(--c-gray);
+            border: 4px solid var(--c-white);
+            box-shadow: 10px 10px 0px var(--c-red);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-select-constructivist {
+            background-color: var(--c-black);
+            color: var(--c-yellow);
+            border: 3px solid var(--c-white);
+            border-radius: 0;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.3rem;
+            box-shadow: 4px 4px 0px var(--c-red);
+        }
+
+        .visual-box {
+            background: var(--c-black);
+            border-bottom: 3px solid var(--c-white);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .visual-icon {
+            font-size: 5rem;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* Botões de Opção (A / B) */
+        .btn-option {
+            background-color: var(--c-black);
+            color: var(--c-white);
+            font-size: 1.1rem;
+            border: 3px solid var(--c-white);
+            border-radius: 0;
+            padding: 15px;
+            text-align: left;
+            transition: all 0.2s ease;
+            box-shadow: 5px 5px 0px var(--c-yellow);
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .btn-option:hover {
+            background-color: var(--c-yellow);
+            color: var(--c-black);
+            box-shadow: 5px 5px 0px var(--c-red);
+            transform: translate(-2px, -2px);
+        }
+
+        /* Banner de Resultado */
+        .feedback-box {
+            display: none;
+            border: 3px solid var(--c-white);
+            padding: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .feedback-correct {
+            background-color: var(--c-green);
+            color: white;
+            box-shadow: 6px 6px 0px var(--c-yellow);
+        }
+
+        .feedback-wrong {
+            background-color: var(--c-red);
+            color: white;
+            box-shadow: 6px 6px 0px var(--c-yellow);
+        }
+
+        .btn-next {
+            background-color: var(--c-yellow);
+            color: var(--c-black);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.4rem;
+            border: 3px solid var(--c-white);
+            border-radius: 0;
+            box-shadow: 4px 4px 0px var(--c-red);
+            width: 100%;
+        }
+
+        .btn-next:hover {
+            background-color: var(--c-red);
+            color: var(--c-white);
+            box-shadow: 4px 4px 0px var(--c-yellow);
+        }
+
+        .diagonal-stripe {
+            height: 8px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--c-yellow),
+                var(--c-yellow) 10px,
+                var(--c-black) 10px,
+                var(--c-black) 20px
+            );
+        }
+    </style>
+</head>
+<body class="py-4">
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <a href="/games.html" class="btn btn-home px-4 py-2">
+                <i class="bi bi-arrow-left-square-fill me-2"></i> VOLTAR
+            </a>
+            <span class="badge bg-danger text-white font-constructivist fs-6 px-3 py-2 border border-white">
+                DESAFIO INTERATIVO // DIA D TECNOLOGIA
+            </span>
+        </div>
+
+        <header class="text-center mb-4">
+            <h1 class="display-4 fw-bold text-white mb-0" style="text-shadow: 4px 4px 0px var(--c-red);">
+                QUAL É A DECISÃO CERTA?
+            </h1>
+            <p class="text-warning font-constructivist fs-5">
+                Coloque-se no lugar da cientista e descubra a invenção!
+            </p>
+        </header>
+
+        <div class="quiz-container">
+            
+            <div class="mb-4">
+                <label for="quiz-select" class="form-label font-constructivist fs-5 text-white mb-1">
+                    <i class="bi bi-gear-wide-connected me-2"></i>ESCOLHA O DESAFIO:
+                </label>
+                <select id="quiz-select" class="form-select form-select-constructivist">
+                    <option value="0">01. O Vidro Congelado no Inverno (Mary Anderson)</option>
+                    <option value="1">02. O Experimento Líquido 'Estragado' (Stephanie Kwolek)</option>
+                    <option value="2">03. Os Torpedos Interceptados na Guerra (Hedy Lamarr)</option>
+                    <option value="3">04. O Código em Zeros e Uns Demorado (Grace Hopper)</option>
+                    <option value="5">05. A Cirurgia de Olho Dolorosa (Dr. Patricia Bath)</option>
+                </select>
+            </div>
+
+            <div class="constructivist-card">
+                
+                <div class="visual-box">
+                    <div class="visual-icon mb-2" id="q-icon">❄️</div>
+                    <span class="badge bg-danger text-white font-constructivist fs-6 px-3 py-1 mb-2 border border-white" id="q-tag">
+                        DESAFIO #01
+                    </span>
+                    <h3 class="text-warning text-center font-constructivist m-0 fs-3" id="q-title">
+                        O PROBLEMA DO PÁRA-BRISA
+                    </h3>
+                </div>
+
+                <div class="diagonal-stripe"></div>
+
+                <div class="p-4">
+                    <p class="fs-5 text-white fw-bold mb-4" id="q-problem" style="line-height: 1.5;">
+                        Carregando problema...
+                    </p>
+
+                    <div class="d-flex flex-column gap-3 mb-3" id="options-container">
+                        <button class="btn-option" onclick="checkAnswer(0)" id="opt-0">
+                            Carregando Opção A...
+                        </button>
+                        <button class="btn-option" onclick="checkAnswer(1)" id="opt-1">
+                            Carregando Opção B...
+                        </button>
+                    </div>
+
+                    <div id="feedback-box" class="feedback-box">
+                        <h4 class="font-constructivist mb-2" id="feedback-title">RESULTADO</h4>
+                        <p class="m-0 fs-6" id="feedback-text"></p>
+                    </div>
+
+                    <div class="mt-4" id="next-box" style="display: none;">
+                        <button class="btn btn-next py-2" onclick="nextQuiz()">
+                            PRÓXIMO DESAFIO <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 p-3 border border-white bg-dark text-center" style="box-shadow: 5px 5px 0px var(--c-yellow);">
+                <span class="text-uppercase font-constructivist text-warning fs-6 d-block mb-1">💡 O IMPACTO NA HISTÓRIA:</span>
+                <small class="text-white fs-6" id="q-curiosity">
+                    Responda o desafio para ver o impacto histórico!
+                </small>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const challenges = [
+            {
+                title: "O PÁRA-BRISA DE BONDE (1902)",
+                icon: "❄️",
+                tag: "MARY ANDERSON // LIMPADOR DE PÁRA-BRISA",
+                problem: "Você está num bonde em Nova York durante uma forte nevasca. O vidro fica coberto de gelo e o motorista não enxerga nada. O que fazer para resolver este problema de forma prática?",
+                options: [
+                    {
+                        text: "A) Parar o veículo a cada 2 minutos, abrir a janela e colocar a cabeça no frio congelante para limpar o vidro com um pano manual.",
+                        correct: false,
+                        explanation: "❌ Essa era a 'gambiarra' perigosa que eles faziam na época! Era lento, congelava o motorista e não resolvia o problema."
+                    },
+                    {
+                        text: "B) Criar uma alavanca mecânica interna conectada a uma lâmina de borracha do lado de fora do vidro.",
+                        correct: true,
+                        explanation: "🎉 EXATO! Mary Anderson desenhou o primeiro limpador de pára-brisa acionado de DENTRO do veículo, sem precisar passar frio!"
+                    }
+                ],
+                curiosity: "Patenteado em 1903, o limpador de pára-brisa virou item de segurança obrigatório em todos os carros do planeta!"
+            },
+            {
+                title: "O LÍQUIDO 'ESTRAGADO' NO LABORATÓRIO (1965)",
+                icon: "🧪",
+                tag: "STEPHANIE KWOLEK // KEVLAR",
+                problem: "Sua mistura química para criar fibras mais leves ficou turva, fluida e leitosa. Seus colegas dizem que o experimento falhou e mandam jogar tudo no lixo. Qual sua atitude?",
+                options: [
+                    {
+                        text: "A) Insistir em colocar o líquido turvo na máquina de fiação para testar a resistência do fio gerado.",
+                        correct: true,
+                        explanation: "🎉 SUCESSO! A teimosia científica de Stephanie deu origem ao Kevlar, uma fibra 5 vezes mais forte que o aço!"
+                    },
+                    {
+                        text: "B) Concordar com a equipe, jogar a mistura fora e recomeçar a fórmula do zero.",
+                        correct: false,
+                        explanation: "❌ Se ela tivesse jogado fora, o Kevlar nunca teria sido inventado! A persistência dela salvou vidas."
+                    }
+                ],
+                curiosity: "O Kevlar é o material leve usado em coletes à prova de balas, capacetes e naves espaciais da NASA!"
+            },
+            {
+                title: "TORPEDOS INTERCEPTADOS NA GUERRA (1941)",
+                icon: "📶",
+                tag: "HEDY LAMARR // BASE DO WI-FI",
+                problem: "Na 2ª Guerra Mundial, os inimigos descobrem a frequência de rádio do seu torpedo e bloqueiam o sinal. Como impedir que o sinal seja interceptado?",
+                options: [
+                    {
+                        text: "A) Fazer o transmissor e o receptor mudarem de frequência juntos constantemente (como saltar teclas de piano).",
+                        correct: true,
+                        explanation: "🎉 GENIAL! Hedy inventou a tecnologia de 'Salto de Frequência' (Frequency Hopping), impossibilitando o bloqueio do sinal!"
+                    },
+                    {
+                        text: "B) Aumentar a potência da antena para tentar 'atropelar' o sinal do inimigo.",
+                        correct: false,
+                        explanation: "❌ Não funcionava! Aumentar a potência só facilitava para o inimigo localizar a posição do seu navio."
+                    }
+                ],
+                curiosity: "Essa invenção de Hedy Lamarr tornou-se a base das tecnologias sem fio modernas: Wi-Fi, Bluetooth e 5G!"
+            },
+            {
+                title: "CÓDIGO LENTO EM ZEROS E UNS (1952)",
+                icon: "💻",
+                tag: "GRACE HOPPER // PRIMEIRO COMPILADOR",
+                problem: "Programar computadores nos anos 50 exige escrever milhares de números '0' e '1' manualmente. Leva semanas e um erro estraga tudo. O que fazer?",
+                options: [
+                    {
+                        text: "A) Criar um programa tradutor que entenda palavras em inglês e as converta automaticamente em zeros e uns.",
+                        correct: true,
+                        explanation: "🎉 PERFEITO! Grace Hopper inventou o 'Compilador', permitindo que humanos programem usando linguagens de texto legíveis!"
+                    },
+                    {
+                        text: "B) Treinar mais matemáticos para digitação ultra-rápida de zeros e uns.",
+                        correct: false,
+                        explanation: "❌ Isso não resolveria o problema dos erros humanos frequentes e da limitação na criação de softwares complexos."
+                    }
+                ],
+                curiosity: "Grace Hopper criou a linguagem COBOL e popularizou o termo 'Bug' de computador após achar uma mariposa presa nos circuitos!"
+            },
+            {
+                title: "CATARATA E CEGUEIRA (1986)",
+                icon: "👁️",
+                tag: "DRA. PATRICIA BATH // LASERPHACO PROBE",
+                problem: "Remover a catarata dos olhos usando lâminas manuais de aço é muito doloroso, arriscado e impreciso. Como modernizar essa cirurgia?",
+                options: [
+                    {
+                        text: "A) Usar um feixe minúsculo de luz laser para vaporizar a catarata de forma rápida e indolor.",
+                        correct: true,
+                        explanation: "🎉 EXCELENTE! Dra. Patricia Bath criou a sonda a laser que restaurou a visão de pessoas cegas há mais de 30 anos!"
+                    },
+                    {
+                        text: "B) Desenvolver lâminas mecânicas menores e mais afiadas.",
+                        correct: false,
+                        explanation: "❌ As lâminas ainda causavam atrito e riscos de infecção no olho. O laser trouxe a precisão necessária!"
+                    }
+                ],
+                curiosity: "Dra. Patricia Bath foi a primeira médica negra a receber uma patente de invenção médica nos Estados Unidos!"
+            }
+        ];
+
+        let currentIndex = 0;
+
+        const select = document.getElementById('quiz-select');
+        const qTitle = document.getElementById('q-title');
+        const qIcon = document.getElementById('q-icon');
+        const qTag = document.getElementById('q-tag');
+        const qProblem = document.getElementById('q-problem');
+        const opt0 = document.getElementById('opt-0');
+        const opt1 = document.getElementById('opt-1');
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBox = document.getElementById('next-box');
+        const qCuriosity = document.getElementById('q-curiosity');
+
+        function loadChallenge(index) {
+            currentIndex = index;
+            const data = challenges[index];
+
+            qTitle.innerText = data.title;
+            qIcon.innerText = data.icon;
+            qTag.innerText = data.tag;
+            qProblem.innerText = data.problem;
+            opt0.innerText = data.options[0].text;
+            opt1.innerText = data.options[1].text;
+            qCuriosity.innerText = data.curiosity;
+
+            // Reseta caixa de resposta
+            feedbackBox.style.display = 'none';
+            nextBox.style.display = 'none';
+            opt0.disabled = false;
+            opt1.disabled = false;
+
+            select.value = index;
+        }
+
+        function checkAnswer(chosenOption) {
+            const data = challenges[currentIndex];
+            const selected = data.options[chosenOption];
+
+            // Desabilita botões após escolher
+            opt0.disabled = true;
+            opt1.disabled = true;
+
+            feedbackBox.style.display = 'block';
+            nextBox.style.display = 'block';
+
+            if (selected.correct) {
+                feedbackBox.className = 'feedback-box feedback-correct';
+                feedbackTitle.innerText = "¡VOCÊ ACERTOU A DECISÃO!";
+            } else {
+                feedbackBox.className = 'feedback-box feedback-wrong';
+                feedbackTitle.innerText = "❌ DECISÃO INCORRETA!";
+            }
+
+            feedbackText.innerText = selected.explanation;
+        }
+
+        function nextQuiz() {
+            if (currentIndex < challenges.length - 1) {
+                loadChallenge(currentIndex + 1);
+            } else {
+                loadChallenge(0); // Reinicia
+            }
+        }
+
+        select.addEventListener('change', (e) => {
+            loadChallenge(parseInt(e.target.value));
+        });
+
+        // Inicializa no primeiro desafio
+        loadChallenge(0);
+    </script>
+</body>
+</html>
