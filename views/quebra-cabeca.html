@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mulheres na Ciência - Quebra-Cabeça Construtivista</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --c-red: #e63946;
+            --c-yellow: #ffb703;
+            --c-black: #0d0d0d;
+            --c-white: #ffffff;
+            --c-gray: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--c-black);
+            color: var(--c-white);
+            font-family: 'Space Grotesk', sans-serif;
+            min-height: 100vh;
+            /* Padrão geométrico sutil no fundo */
+            background-image: 
+                linear-gradient(45deg, #141414 25%, transparent 25%), 
+                linear-gradient(-45deg, #141414 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #141414 75%), 
+                linear-gradient(-45deg, transparent 75%, #141414 75%);
+            background-size: 40px 40px;
+            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+        }
+
+        h1, h2, h3, .font-constructivist {
+            font-family: 'Bebas Neue', cursive;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Molduras e Blocos Geométricos Construtivistas */
+        .constructivist-box {
+            background: var(--c-gray);
+            border: 3px solid var(--c-white);
+            box-shadow: 8px 8px 0px var(--c-red);
+            border-radius: 0;
+            position: relative;
+        }
+
+        .banner-header {
+            background: var(--c-red);
+            color: var(--c-white);
+            border: 3px solid var(--c-white);
+            box-shadow: 6px 6px 0px var(--c-yellow);
+            transform: rotate(-1deg);
+        }
+
+        /* Botão Personalizado de Voltar para Home */
+        .btn-home {
+            background-color: transparent;
+            color: var(--c-yellow);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.3rem;
+            border: 3px solid var(--c-yellow);
+            border-radius: 0;
+            box-shadow: 4px 4px 0px var(--c-red);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: var(--c-yellow);
+            color: var(--c-black);
+            box-shadow: 6px 6px 0px var(--c-white);
+            transform: translate(-2px, -2px);
+        }
+
+        /* Botão Ação Construtivista */
+        .btn-action {
+            background-color: var(--c-red);
+            color: var(--c-white);
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.3rem;
+            border: 3px solid var(--c-white);
+            border-radius: 0;
+            box-shadow: 4px 4px 0px var(--c-yellow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            background-color: var(--c-yellow);
+            color: var(--c-black);
+            box-shadow: 6px 6px 0px var(--c-red);
+            transform: translate(-2px, -2px);
+        }
+
+        /* Select customizado */
+        .form-select-constructivist {
+            background-color: var(--c-black);
+            color: var(--c-white);
+            border: 3px solid var(--c-white);
+            border-radius: 0;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.2rem;
+        }
+
+        .form-select-constructivist:focus {
+            background-color: var(--c-black);
+            color: var(--c-white);
+            border-color: var(--c-yellow);
+            box-shadow: none;
+        }
+
+        /* Tabuleiro do Quebra-Cabeça */
+        #board-container {
+            position: relative;
+            padding: 10px;
+            background: var(--c-yellow);
+            border: 4px solid var(--c-white);
+            box-shadow: 10px 10px 0px var(--c-red);
+            display: inline-block;
+        }
+
+        #board {
+            width: 330px;
+            height: 330px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            background-color: var(--c-black);
+        }
+
+        .tile {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .tile:hover {
+            filter: brightness(1.2) contrast(1.1);
+        }
+
+        .tile.selected {
+            outline: 5px solid var(--c-yellow);
+            outline-offset: -5px;
+            transform: scale(0.95);
+        }
+
+        /* Card Educativo */
+        .info-card-constructivist {
+            background: var(--c-black);
+            border: 3px solid var(--c-yellow);
+            box-shadow: 6px 6px 0px var(--c-red);
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Faixa decorativa diagonal */
+        .diagonal-stripe {
+            height: 8px;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--c-yellow),
+                var(--c-yellow) 10px,
+                var(--c-black) 10px,
+                var(--c-black) 20px
+            );
+        }
+    </style>
+</head>
+<body class="py-4">
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/games.html" class="btn btn-home px-4 py-2">
+                <i class="bi bi-arrow-left-square-fill me-2"></i> VOLTAR
+            </a>
+            <span class="badge bg-warning text-dark font-constructivist fs-6 px-3 py-2 border border-white">
+                DIA D TECNOLOGIA // VANGUARDA CIENTÍFICA
+            </span>
+        </div>
+
+        <header class="banner-header p-4 mb-4 text-center">
+            <h1 class="display-3 fw-bold mb-0">MULHERES NA CIÊNCIA</h1>
+            <p class="fs-5 text-uppercase fw-bold mb-0" style="letter-spacing: 1px;">
+                ⚙️ Ciência em Movimento • Monte a Engrenagem do Conhecimento
+            </p>
+        </header>
+
+        <div class="row g-4 align-items-start">
+            
+            <div class="col-lg-5">
+                <div class="constructivist-box p-4 mb-4">
+                    <div class="diagonal-stripe mb-3"></div>
+                    <h3 class="text-warning mb-3"><i class="bi bi-sliders me-2"></i>PAINEL DE CONTROLE</h3>
+                    
+                    <div class="mb-3">
+                        <label for="scientist-select" class="form-label text-uppercase fw-bold text-white">Escolha a Cientista:</label>
+                        <select id="scientist-select" class="form-select form-select-constructivist">
+                            <option value="marie">01. MARIE CURIE (Física & Química)</option>
+                            <option value="ada">02. ADA LOVELACE (Computação)</option>
+                            <option value="katherine">03. KATHERINE JOHNSON (NASA / Física)</option>
+                            <option value="margaret">04. MARGARET HAMILTON (Eng. de Software)</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button id="restart-btn" class="btn btn-action py-2">
+                            <i class="bi bi-shuffle me-2"></i> EMBARALHAR QUEBRA-CABEÇA
+                        </button>
+                    </div>
+                </div>
+
+                <div class="constructivist-box p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-secondary text-uppercase d-block small">MOVIMENTOS</span>
+                        <span id="moves-count" class="font-constructivist display-5 text-warning fw-bold">0</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary text-uppercase d-block small">STATUS</span>
+                        <span id="status-msg" class="fw-bold text-white fs-6">Selecione 2 peças para trocar</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 d-flex flex-column align-items-center">
+                
+                <div id="board-container">
+                    <div id="board"></div>
+                </div>
+
+                <div id="info-card" class="info-card-constructivist p-4 mt-4 w-100">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-danger text-white fs-6 me-2 font-constructivist">PIONEIRA CONFIRMADA</span>
+                        <h3 id="card-title" class="text-warning m-0"></h3>
+                    </div>
+                    <div class="diagonal-stripe mb-3"></div>
+                    <p id="card-desc" class="lead text-white mb-0" style="font-size: 1rem; line-height: 1.5;"></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados Educativos e Estilo Gráfico Construtivista de cada Cientista
+        const scientists = {
+            marie: {
+                name: "MARIE CURIE (1867–1934)",
+                desc: "Pioneira no estudo da radioatividade. Única pessoa a vencer dois Prêmios Nobel em áreas científicas distintas (Física e Química). Descobriu os elementos Polônio e Rádio.",
+                bg: "#e63946",
+                accent: "#ffb703",
+                symbol: "☢️"
+            },
+            ada: {
+                name: "ADA LOVELACE (1815–1852)",
+                desc: "Matemática britânica. Escreveu o primeiro algoritmo da história a ser processado por uma máquina, tornando-se a mãe da programação de computadores.",
+                bg: "#00b4d8",
+                accent: "#ffb703",
+                symbol: "💻"
+            },
+            katherine: {
+                name: "KATHERINE JOHNSON (1918–2020)",
+                desc: "Matemática da NASA cujos cálculos manuais de trajetória orbital foram cruciais para o sucesso das missões espaciais tripuladas dos EUA e a Apollo 11 na Lua.",
+                bg: "#ffb703",
+                accent: "#e63946",
+                symbol: "🚀"
+            },
+            margaret: {
+                name: "MARGARET HAMILTON (1936-Presente)",
+                desc: "Cientista da computação e engenheira de software. Liderou a divisão da NASA responsável pelo software de navegação a bordo do Programa Espacial Apollo.",
+                bg: "#2b2d42",
+                accent: "#e63946",
+                symbol: "⚙️"
+            }
+        };
+
+        const GRID_SIZE = 3;
+        let pieces = [];
+        let selectedIndex = null;
+        let moves = 0;
+        let currentScientist = 'marie';
+        let scientistCanvas = document.createElement('canvas');
+
+        const board = document.getElementById('board');
+        const select = document.getElementById('scientist-select');
+        const restartBtn = document.getElementById('restart-btn');
+        const movesDisplay = document.getElementById('moves-count');
+        const statusMsg = document.getElementById('status-msg');
+        const infoCard = document.getElementById('info-card');
+        const cardTitle = document.getElementById('card-title');
+        const cardDesc = document.getElementById('card-desc');
+
+        // Renderiza arte Construtivista via HTML5 Canvas
+        function generateScientistImage(key) {
+            const data = scientists[key];
+            scientistCanvas.width = 330;
+            scientistCanvas.height = 330;
+            const ctx = scientistCanvas.getContext('2d');
+
+            // Fundo Sólido Construtivista
+            ctx.fillStyle = data.bg;
+            ctx.fillRect(0, 0, 330, 330);
+
+            // Elementos Geométricos de Vanguarda
+            ctx.fillStyle = "#0d0d0d";
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(330, 100);
+            ctx.lineTo(330, 0);
+            ctx.fill();
+
+            ctx.fillStyle = data.accent;
+            ctx.beginPath();
+            ctx.moveTo(0, 230);
+            ctx.lineTo(330, 330);
+            ctx.lineTo(0, 330);
+            ctx.fill();
+
+            // Moldura Interna em Linhas Grossas
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 8;
+            ctx.strokeRect(10, 10, 310, 310);
+
+            // Ícone Central
+            ctx.font = "85px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(data.symbol, 165, 135);
+
+            // Tipografia Forte em Caixa Alta
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 26px 'Bebas Neue', cursive";
+            const shortName = data.name.split('(')[0].trim();
+            ctx.fillText(shortName, 165, 220);
+
+            ctx.fillStyle = "#0d0d0d";
+            ctx.font = "bold 16px 'Space Grotesk', sans-serif";
+            ctx.fillText("PIONEIRA DA CIÊNCIA", 165, 285);
+        }
+
+        // Inicializa o Quebra-Cabeça
+        function initGame() {
+            currentScientist = select.value;
+            generateScientistImage(currentScientist);
+            
+            pieces = Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, i) => i);
+            
+            moves = 0;
+            selectedIndex = null;
+            movesDisplay.innerText = moves;
+            statusMsg.innerText = "Troque as peças para alinhar";
+            statusMsg.className = "fw-bold text-white fs-6";
+            infoCard.style.display = "none";
+
+            shuffle(pieces);
+            renderBoard();
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            
+            pieces.forEach((pieceOriginalIndex, currentGridPosition) => {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                
+                const origRow = Math.floor(pieceOriginalIndex / GRID_SIZE);
+                const origCol = pieceOriginalIndex % GRID_SIZE;
+                
+                const pieceCanvas = document.createElement('canvas');
+                pieceCanvas.width = 110;
+                pieceCanvas.height = 110;
+                const pCtx = pieceCanvas.getContext('2d');
+                pCtx.drawImage(
+                    scientistCanvas, 
+                    origCol * 110, origRow * 110, 110, 110, 
+                    0, 0, 110, 110
+                );
+
+                tile.style.backgroundImage = `url(${pieceCanvas.toDataURL()})`;
+
+                if (selectedIndex === currentGridPosition) {
+                    tile.classList.add('selected');
+                }
+
+                tile.addEventListener('click', () => handleTileClick(currentGridPosition));
+                board.appendChild(tile);
+            });
+        }
+
+        function handleTileClick(index) {
+            if (checkWin()) return;
+
+            if (selectedIndex === null) {
+                selectedIndex = index;
+            } else if (selectedIndex === index) {
+                selectedIndex = null;
+            } else {
+                [pieces[selectedIndex], pieces[index]] = [pieces[index], pieces[selectedIndex]];
+                selectedIndex = null;
+                moves++;
+                movesDisplay.innerText = moves;
+
+                if (checkWin()) {
+                    showVictory();
+                }
+            }
+            renderBoard();
+        }
+
+        function checkWin() {
+            return pieces.every((val, index) => val === index);
+        }
+
+        function showVictory() {
+            statusMsg.innerText = "¡CONCLUÍDO COM SUCESSO!";
+            statusMsg.className = "fw-bold text-warning fs-6 font-constructivist";
+            
+            const info = scientists[currentScientist];
+            cardTitle.innerText = info.name;
+            cardDesc.innerText = info.desc;
+            infoCard.style.display = "block";
+        }
+
+        select.addEventListener('change', initGame);
+        restartBtn.addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>
